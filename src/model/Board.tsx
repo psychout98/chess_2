@@ -1,12 +1,13 @@
 export interface Board {
     id: string,
-    boardKey: string[][],
-    history: { [key: number]: Move },
     pieces: { [key: string]: Piece },
+    boardKey: string[][],
     whiteToMove: boolean,
     currentMove: number,
     check: boolean,
-    checkmate: boolean
+    checkmate: boolean,
+    stalemate: boolean,
+    history: { [key: number]: Move }
 }
 
 export interface Move {

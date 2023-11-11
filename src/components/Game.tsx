@@ -10,7 +10,7 @@ export const Game: React.FC<{ board: Board, move: Function }> = ({ board, move }
 
     return (
         <div className="flex flex-col-reverse w-[600px] h-[600px] bg-white">
-            {board.checkmate ? 'checkmate' : null}
+            {board.stalemate ? 'draw' : board.checkmate ? 'checkmate' : null}
             {board.boardKey?.map((row, i) => {
                 return <div className="flex flex-row w-full h-[75px]" key={i}>
                     {row?.map((key, j) => {
