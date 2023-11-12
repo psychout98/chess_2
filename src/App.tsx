@@ -3,7 +3,7 @@ import { Home } from "./components/Home";
 import './index.css';
 import axios from 'axios';
 
-axios.defaults.baseURL = 'https://chess-404900.uk.r.appspot.com/';
+axios.defaults.baseURL = 'https://34.86.105.30:8080';
 axios.defaults.withCredentials = true;
 
 function App(): JSX.Element {
