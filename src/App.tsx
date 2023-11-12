@@ -3,14 +3,14 @@ import { Home } from "./components/Home";
 import './index.css';
 import axios from 'axios';
 
-axios.defaults.baseURL = 'https://pacific-refuge-56148-96967b0a6dc5.herokuapp.com';
+axios.defaults.baseURL = 'https://chess-404900.uk.r.appspot.com/';
 axios.defaults.withCredentials = true;
 
 function App(): JSX.Element {
   return (
     <Router>
       <Routes>
-        <Route path='/chess_2/:boardid?' element={<Home />} />
+        <Route path='/:boardid?' element={<Home />} />
       </Routes>
     </Router>
   );

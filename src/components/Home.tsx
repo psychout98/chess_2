@@ -6,7 +6,7 @@ import { Game } from "./Game"
 import { Client } from '@stomp/stompjs';
 
 const client = new Client();
-client.brokerURL = 'wss://pacific-refuge-56148-96967b0a6dc5.herokuapp.com';
+client.brokerURL = 'wss://chess-404900.uk.r.appspot.com/';
 
 
 export const Home: React.FC = () => {
