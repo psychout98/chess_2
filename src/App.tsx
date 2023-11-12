@@ -10,7 +10,7 @@ function App(): JSX.Element {
   return (
     <Router>
       <Routes>
-        <Route path='/:boardid?' element={<Home />} />
+        <Route path='/chess_2/:boardid?' element={<Home />} />
       </Routes>
     </Router>
   );
