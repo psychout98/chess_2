@@ -1,12 +1,12 @@
-import { useEffect, useState, useCallback } from "react";
+import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import { Board, BoardResponse } from "../model/Board";
 import axios from "axios";
 import { Game } from "./Game"
-import { Client, Message } from '@stomp/stompjs';
+import { Client } from '@stomp/stompjs';
 
 const client = new Client();
-client.brokerURL = 'ws://localhost:8080';
+client.brokerURL = 'ws://pacific-refuge-56148-96967b0a6dc5.herokuapp.com';
 
 
 export const Home: React.FC = () => {

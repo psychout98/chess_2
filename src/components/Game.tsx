@@ -15,7 +15,7 @@ export const Game: React.FC<{ board: Board, move: Function, player: number }> = 
                 return <div className={`flex ${player === 2 ? 'flex-row-reverse' : 'flex-row'} w-full h-[75px]`} key={i}>
                     {row?.map((key, j) => {
                         let spot = i.toString() + j.toString()
-                        return <div className={`flex relative w-[75px] h-full ${i % 2 == 0 ? (j % 2 == 0 ? 'bg-sky-500' : '') : (j % 2 == 0 ? '' : 'bg-sky-500')}`} key={j}>
+                        return <div className={`flex relative w-[75px] h-full ${i % 2 === 0 ? (j % 2 === 0 ? 'bg-sky-500' : '') : (j % 2 === 0 ? '' : 'bg-sky-500')}`} key={j}>
                             <span id={key} className={`flex absolute top-0 left-0 w-full h-full  ${selected === key || moves.includes(spot) ? 'bg-green-400 opacity-50' : ''}`} onMouseDown={(e) => {
                                 e.preventDefault()
                                 if (key.startsWith(board.whiteToMove ? 'w' : 'b') && myMove) {
