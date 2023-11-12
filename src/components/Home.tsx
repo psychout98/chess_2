@@ -6,7 +6,7 @@ import { Game } from "./Game"
 import { Client } from '@stomp/stompjs';
 
 const client = new Client();
-client.brokerURL = 'ws://pacific-refuge-56148-96967b0a6dc5.herokuapp.com';
+client.brokerURL = 'https://pacific-refuge-56148-96967b0a6dc5.herokuapp.com';
 
 
 export const Home: React.FC = () => {
