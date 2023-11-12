@@ -4,6 +4,7 @@ import './index.css';
 import axios from 'axios';
 
 axios.defaults.baseURL = 'http://localhost:8080';
+axios.defaults.withCredentials = true;
 
 function App(): JSX.Element {
   return (

@@ -1,5 +1,12 @@
+export interface BoardResponse {
+    sessionId: string,
+    board: Board
+}
+
 export interface Board {
     id: string,
+    white: Player,
+    black: Player,
     pieces: { [key: string]: Piece },
     boardKey: string[][],
     whiteToMove: boolean,
@@ -8,6 +15,11 @@ export interface Board {
     checkmate: boolean,
     stalemate: boolean,
     history: { [key: number]: Move }
+}
+
+export interface Player {
+    name: string,
+    sessionId: string
 }
 
 export interface Move {
