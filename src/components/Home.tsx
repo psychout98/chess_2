@@ -11,11 +11,12 @@ client.brokerURL = 'wss://pacific-refuge-56148-96967b0a6dc5.herokuapp.com';
 
 export const Home: React.FC = () => {
 
-    let { boardid } = useParams()
+    let { chess2, boardid } = useParams()
     const [board, setBoard] = useState<Board>()
     const [player, setPlayer] = useState<number>(0)
     const [subscribed, setSubscribed] = useState<boolean>(false)
     setTimeout(getBoard, 10000)
+    console.log(chess2, boardid)
 
     useEffect(() => {
         if (boardid && !board) {
