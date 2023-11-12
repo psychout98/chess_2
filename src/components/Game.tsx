@@ -32,7 +32,7 @@ export const Game: React.FC<{ board: Board, move: Function, player: number }> = 
                                     setCurrentSpot('')
                                     setMoves([])
                                 }
-                            }}>{key !== '' ? <img src={`./${key.substring(0, 2)}.png`}/> : null}</span>
+                            }}>{key !== '' ? <img src={`/chess_2/${key.substring(0, 2)}.png`}/> : null}</span>
                         </div>
                     })}
                 </div>

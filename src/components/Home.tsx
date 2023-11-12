@@ -1,12 +1,12 @@
 import { useEffect, useState } from "react";
-import { useParams } from "react-router-dom";
+import { useParams, useNavigate } from "react-router-dom";
 import { Board, BoardResponse } from "../model/Board";
 import axios from "axios";
 import { Game } from "./Game"
 import { Client } from '@stomp/stompjs';
 
 const client = new Client();
-client.brokerURL = 'wss://34.86.105.30:8080';
+client.brokerURL = 'wss://pacific-refuge-56148-96967b0a6dc5.herokuapp.com/';
 
 
 export const Home: React.FC = () => {
@@ -15,7 +15,7 @@ export const Home: React.FC = () => {
     const [board, setBoard] = useState<Board>()
     const [player, setPlayer] = useState<number>(0)
     const [subscribed, setSubscribed] = useState<boolean>(false)
-    setTimeout(getBoard, 10000)
+    const navigate = useNavigate()
 
     useEffect(() => {
         if (boardid && !board) {
@@ -38,8 +38,10 @@ export const Home: React.FC = () => {
     function getBoard() {
         axios.get<BoardResponse>(`board/${boardid || board?.id || ''}`)
             .then((result) => {
+                console.log(result)
                 setBoard(result.data.board)
                 setPlayer(result.data.board.white.sessionId === result.data.sessionId ? 1 : result.data.board.black.sessionId === result.data.sessionId ? 2 : 0)
+                setTimeout(getBoard, 10000)
             }).catch((error) => {
                 console.log(error)
             })
@@ -48,6 +50,7 @@ export const Home: React.FC = () => {
     function move(moveCode: string) {
         axios.put<BoardResponse>(`board/${board?.id}/move/${moveCode}`)
             .then((result) => {
+                console.log(result)
                 client.publish({ destination: `/board/${board?.id}`, body: 'move' });
                 setBoard(result.data.board)
             }).catch((error) => {
@@ -58,7 +61,9 @@ export const Home: React.FC = () => {
     function createGame(e: React.MouseEvent<HTMLDivElement, MouseEvent>) {
         e.preventDefault()
         axios.post<BoardResponse>('board').then((result) => {
-            window.history.replaceState(null, "Chess", result.data.board.id)
+            navigate(`/chess_2/${result.data.board.id}`)
+            // console.log(result)
+            // window.history.replaceState(null, "Chess", result.data.board.id)
             setPlayer(result.data.board.white.sessionId === result.data.sessionId ? 1 : result.data.board.black.sessionId === result.data.sessionId ? 2 : 0)
             setBoard(result.data.board)
         })
