@@ -67,7 +67,7 @@ export const Home: React.FC = () => {
 
     return (
         <div className="flex flex-col w-screen h-screen bg-sky-300 items-center justify-center">
-            <a href="/" className="absolute top-0 left-0">home</a>
+            <a href="/chess_2/" className="absolute top-0 left-0">home</a>
             {board ?
                 <Game board={board} move={move} player={player} /> :
                 <div className="flex bg-white select-none p-3" onClick={createGame}>Create game</div>
