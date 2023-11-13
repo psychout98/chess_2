@@ -38,9 +38,13 @@ export const Home: React.FC = () => {
     function getBoard() {
         axios.get<BoardResponse>(`board/${boardid || board?.id || ''}`)
             .then((result) => {
-                console.log(result)
+                let sessionId = window.sessionStorage.getItem("sessionId")
+                if (!sessionId) {
+                    window.sessionStorage.setItem("sessionId", result.data.sessionId)
+                    sessionId = result.data.sessionId
+                }
                 setBoard(result.data.board)
-                setPlayer(result.data.board.white.sessionId === result.data.sessionId ? 1 : result.data.board.black.sessionId === result.data.sessionId ? 2 : 0)
+                setPlayer(result.data.board.white.sessionId === sessionId ? 1 : result.data.board.black.sessionId === sessionId ? 2 : 0)
                 setTimeout(getBoard, 10000)
             }).catch((error) => {
                 console.log(error)
@@ -50,7 +54,6 @@ export const Home: React.FC = () => {
     function move(moveCode: string) {
         axios.put<BoardResponse>(`board/${board?.id}/move/${moveCode}`)
             .then((result) => {
-                console.log(result)
                 client.publish({ destination: `/board/${board?.id}`, body: 'move' });
                 setBoard(result.data.board)
             }).catch((error) => {
@@ -61,9 +64,8 @@ export const Home: React.FC = () => {
     function createGame(e: React.MouseEvent<HTMLDivElement, MouseEvent>) {
         e.preventDefault()
         axios.post<BoardResponse>('board').then((result) => {
+            window.sessionStorage.setItem("sessionId", result.data.sessionId)
             navigate(`/${result.data.board.id}`)
-            // console.log(result)
-            // window.history.replaceState(null, "Chess", result.data.board.id)
             setPlayer(result.data.board.white.sessionId === result.data.sessionId ? 1 : result.data.board.black.sessionId === result.data.sessionId ? 2 : 0)
             setBoard(result.data.board)
         })
