@@ -61,7 +61,7 @@ export const Home: React.FC = () => {
     function createGame(e: React.MouseEvent<HTMLDivElement, MouseEvent>) {
         e.preventDefault()
         axios.post<BoardResponse>('board').then((result) => {
-            navigate(`/chess_2/${result.data.board.id}`)
+            navigate(`/${result.data.board.id}`)
             // console.log(result)
             // window.history.replaceState(null, "Chess", result.data.board.id)
             setPlayer(result.data.board.white.sessionId === result.data.sessionId ? 1 : result.data.board.black.sessionId === result.data.sessionId ? 2 : 0)
