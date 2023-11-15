@@ -24,12 +24,15 @@ export interface Player {
 
 export interface Move {
     moveCode: string,
-    moveString: string
+    moveString: string,
+    boardKeyString: string,
+    destination: number[],
+    attack: boolean
 }
 
 export interface Piece {
     row: number,
     col: number,
     white: boolean,
-    moves: number[][]
+    moves: Move[]
 }
