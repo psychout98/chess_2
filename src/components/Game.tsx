@@ -18,7 +18,7 @@ export const Game: React.FC<{ board: Board, player: number, move: Function, getB
             const lastMoveCode = viewingMove === board.currentMove ? board.history[board.currentMove]?.moveCode : ''
             setLastSpots([lastMoveCode.substring(0, 2), lastMoveCode.substring(2, 4)])
         }
-    }, [board, viewingMove])
+    }, [selected, currentSpot, moves, viewingMove, resigning, lastSpots])
 
     function resign(e: React.MouseEvent<HTMLSpanElement, MouseEvent>) {
         if (resigning) {

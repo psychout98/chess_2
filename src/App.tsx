@@ -1,5 +1,6 @@
 import { HashRouter as Router, Routes, Route } from "react-router-dom";
 import { Home } from "./components/Home";
+import { Login } from "./components/Login";
 import './index.css';
 import axios from 'axios';
 
@@ -11,6 +12,7 @@ function App(): JSX.Element {
     <Router>
       <Routes>
         <Route path='/:boardid?' element={<Home />} />
+        <Route path='/login' element={<Login />} />
       </Routes>
     </Router>
   );

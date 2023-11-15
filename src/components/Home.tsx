@@ -12,12 +12,12 @@ client.brokerURL = process.env.REACT_APP_CHESS_SERVER_WS;
 export const Home: React.FC = () => {
 
     let { boardid } = useParams()
+    const navigate = useNavigate()
     const [board, setBoard] = useState<Board>()
     const [player, setPlayer] = useState<number>(0)
     const [subscribed, setSubscribed] = useState<boolean>(false)
     const [started, setStarted] = useState<boolean>(false)
     const [sessionId, setSessionId] = useState<string>(window.sessionStorage.getItem("sessionId") || '')
-    const navigate = useNavigate()
     const [rematchOffer, setRematchOffer] = useState<string | undefined>()
 
     useEffect(() => {
@@ -50,7 +50,7 @@ export const Home: React.FC = () => {
                 }
             }
         }
-    }, [board, started])
+    }, [board, player, subscribed, started, sessionId, rematchOffer])
 
     function getBoard(viewingMove: number | undefined = board?.currentMove) {
         axios.get<BoardResponse>(`board/${boardid || board?.id || ''}${viewingMove ? `/${viewingMove}` : ''}`)
