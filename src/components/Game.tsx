@@ -73,8 +73,8 @@ export const Game: React.FC<{ board: Board, player: number, move: Function, getB
                             (j % 2 === 0 ? 'text-sky-500' : 'bg-sky-500 text-white')}`} key={j}>
                                 <span id={key} className={`flex absolute top-0 left-0 w-full h-full
                                 ${selected === key ? 'bg-green-300' : 
-                                (moves.includes(spot) ? 'bg-green-300 opacity-60' : 
-                                (spot === lastSpots[0] || spot === lastSpots[1] ? 'bg-indigo-300' : ''))}
+                                (moves.includes(spot) ? 'bg-green-300 opacity-50' : 
+                                (spot === lastSpots[0] ?  'bg-indigo-300 opacity-60' : (spot === lastSpots[1] ? 'bg-indigo-300' : '')))}
                                 ${board.check && key.includes(board.whiteToMove ? 'wk' : 'bk') ? 'bg-red-400' : ''}`} onMouseDown={(e) => {
                                     e.preventDefault()
                                     if (key.startsWith(board.whiteToMove ? 'w' : 'b') && myMove && !board.shallow) {
