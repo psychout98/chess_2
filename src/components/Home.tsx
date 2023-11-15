@@ -18,6 +18,7 @@ export const Home: React.FC = () => {
     const [started, setStarted] = useState<boolean>(false)
     const [sessionId, setSessionId] = useState<string>(window.sessionStorage.getItem("sessionId") || '')
     const navigate = useNavigate()
+    const [rematchOffer, setRematchOffer] = useState<string | undefined>()
 
     useEffect(() => {
         if (boardid && !board) {
@@ -29,6 +30,9 @@ export const Home: React.FC = () => {
                 client.subscribe(`/board/${board?.id}`, (message) => {
                     if (message?.body === 'update') {
                         getBoard()
+                    }
+                    if (message?.body.startsWith('rematch:')) {
+                        setRematchOffer(message.body.split(':')[1])
                     }
                 })
                 setSubscribed(board !== undefined)
@@ -95,9 +99,26 @@ export const Home: React.FC = () => {
             })
     }
 
+    function handleRematch() {
+        if (rematchOffer) {
+            navigate(`/${rematchOffer}`)
+            window.location.reload()
+        } else {
+            axios.post<BoardResponse>('board').then((result) => {
+                client.publish({ destination: `/board/${board?.id}`, body: `rematch:${result.data.board.id}` });
+                window.sessionStorage.setItem("sessionId", result.data.sessionId)
+                navigate(`/${result.data.board.id}`)
+                setPlayer(1)
+                setSubscribed(false)
+                setStarted(false)
+                setBoard(result.data.board)
+            })
+        }
+    }
+
     function mainPanel(): JSX.Element {
         if (board && started) {
-            return <Game board={board} move={move} getBoard={getBoard} player={player} />
+            return <Game board={board} move={move} getBoard={getBoard} player={player} handleRematch={handleRematch} />
         } else if (board && !started) {
             if (player === 0) {
                 return <div className="flex bg-white select-none p-3" onClick={joinGame}>Join game</div>

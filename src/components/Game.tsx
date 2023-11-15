@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { Board, Piece } from "../model/Board";
 
-export const Game: React.FC<{ board: Board, move: Function, getBoard: Function, player: number }> = ({ board, move, getBoard, player }) => {
+export const Game: React.FC<{ board: Board, player: number, move: Function, getBoard: Function, handleRematch: Function }> = ({ board, player, move, getBoard, handleRematch }) => {
 
     const [selected, setSelected] = useState<string | undefined>(undefined)
     const [currentSpot, setCurrentSpot] = useState<string>('')
@@ -11,13 +11,23 @@ export const Game: React.FC<{ board: Board, move: Function, getBoard: Function, 
     const cols = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h']
     const [currentMove, setCurrentMove] = useState<number>(board.currentMove)
     const [viewingMove, setViewingMove] = useState<number>(board.currentMove)
-    
+    const [resigning, setResigning] = useState<boolean>(false)
+
     useEffect(() => {
         if (board.currentMove !== currentMove) {
             setCurrentMove(board.currentMove)
             setViewingMove(board.currentMove)
         }
     }, [board])
+
+    function resign(e: React.MouseEvent<HTMLSpanElement, MouseEvent>) {
+        if (resigning) {
+            setResigning(false)
+            move("resign")
+        } else {
+            setResigning(true)
+        }
+    }
 
     function viewMove(move: number) {
         setViewingMove(move)
@@ -56,20 +66,20 @@ export const Game: React.FC<{ board: Board, move: Function, getBoard: Function, 
                             return <div className={`flex relative w-[12.5%] h-full ${i % 2 === 0 ? (j % 2 === 0 ? 'bg-sky-500 text-white' : 'text-sky-500') : (j % 2 === 0 ? 'text-sky-500' : 'bg-sky-500 text-white')}`} key={j}>
                                 <span id={key} className={`flex absolute top-0 left-0 w-full h-full  ${selected === key || moves.includes(spot) ? 'bg-green-400 opacity-50' : ''} ${board.check && key.includes(board.whiteToMove ? 'wk' : 'bk') ? 'bg-red-400' : ''}`} onMouseDown={(e) => {
                                     e.preventDefault()
-                                        if (key.startsWith(board.whiteToMove ? 'w' : 'b') && myMove && !board.shallow) {
-                                            setSelected(key)
-                                            setCurrentSpot(spot)
-                                            let piece: Piece | undefined = board.pieces[key]
-                                            if (piece) {
-                                                let pieceMoves: string[] | undefined = piece.moves.map(move => move.destination[0].toString() + move.destination[1].toString())
-                                                setMoves(pieceMoves)
-                                            }
-                                        } else if (moves.includes(spot)) {
-                                            move(currentSpot + spot)
-                                            setSelected(undefined)
-                                            setCurrentSpot('')
-                                            setMoves([])
+                                    if (key.startsWith(board.whiteToMove ? 'w' : 'b') && myMove && !board.shallow) {
+                                        setSelected(key)
+                                        setCurrentSpot(spot)
+                                        let piece: Piece | undefined = board.pieces[key]
+                                        if (piece) {
+                                            let pieceMoves: string[] | undefined = piece.moves.map(move => move.destination[0].toString() + move.destination[1].toString())
+                                            setMoves(pieceMoves)
                                         }
+                                    } else if (moves.includes(spot)) {
+                                        move(currentSpot + spot)
+                                        setSelected(undefined)
+                                        setCurrentSpot('')
+                                        setMoves([])
+                                    }
                                 }}>
                                     {key !== '' ? <img src={`/chess_2/${key.substring(0, 2)}.png`} /> : null}
                                     {i === 0 ? <span className={`absolute ${player === 0 || player === 1 ? 'bottom-1' : 'top-0'} left-1`}>{cols[j]}</span> : null}
@@ -80,7 +90,12 @@ export const Game: React.FC<{ board: Board, move: Function, getBoard: Function, 
                     </div>
                 })}
             </div>
-            {board.stalemate ? 'draw' : board.checkmate ? 'checkmate' : board.whiteToMove ? 'white to move' : 'black to move'}
+            <span>{board.stalemate ? 'draw' : board.checkmate ? 'checkmate' : board.winner === 0 ? (board.whiteToMove ? 'white to move' : 'black to move') : ''}</span>
+            <span>{board.winner === 1 ? 'white wins' : board.winner === 2 ? 'black wins' : null}</span>
+            {board.winner === 0 ?
+                <div className={`flex ${resigning ? 'bg-red-300' : 'bg-white'} px-3 select-none mt-1`} onClick={resign}>resign</div> :
+                <div className={`flex bg-white px-3 select-none`} onClick={() => handleRematch()}>rematch</div>
+            }
         </div>
     )
 }

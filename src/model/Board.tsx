@@ -15,7 +15,8 @@ export interface Board {
     checkmate: boolean,
     stalemate: boolean,
     history: { [key: number]: Move },
-    shallow: boolean
+    shallow: boolean,
+    winner: number
 }
 
 export interface Player {
