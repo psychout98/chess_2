@@ -18,11 +18,11 @@ jobs:
         npm install
         npm run-script build
       env:
-        CHESS_SERVER_HTTP: ${{ secrets.CHESS_SERVER_HTTP }}
-        CHESS_SERVER_WS: ${{ secrets.CHESS_SERVER_WS }}
+        REACT_APP_CHESS_SERVER_HTTP: ${{ secrets.REACT_APP_CHESS_SERVER_HTTP }}
+        REACT_APP_CHESS_SERVER_WS: ${{ secrets.REACT_APP_CHESS_SERVER_WS }}
 
     - name: Deploy
-      uses: psychout98/github-pages-deploy-action@releases/v3
+      uses: psychout98/chess_2@v0
       with:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         BRANCH: gh-pages
