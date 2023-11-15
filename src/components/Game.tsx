@@ -20,7 +20,7 @@ export const Game: React.FC<{ board: Board, player: number, move: Function, getB
             setViewingMove(board.currentMove)
         }
         if (currentMove > 0) {
-            const lastMoveCode = board.history[board.currentMove]?.moveCode
+            const lastMoveCode = viewingMove === currentMove ? board.history[board.currentMove]?.moveCode : ''
             setLastSpots([lastMoveCode.substring(0, 2), lastMoveCode.substring(2, 4)])
         }
     }, [board])
@@ -103,9 +103,9 @@ export const Game: React.FC<{ board: Board, player: number, move: Function, getB
             </div>
             <span>{board.stalemate ? 'draw' : board.checkmate ? 'checkmate' : board.winner === 0 ? (board.whiteToMove ? 'white to move' : 'black to move') : ''}</span>
             <span>{board.winner === 1 ? 'white wins' : board.winner === 2 ? 'black wins' : null}</span>
-            {board.winner === 0 ?
+            {player !== 0 ? (board.winner === 0 ?
                 <div className={`flex ${resigning ? 'bg-red-300' : 'bg-white'} px-3 select-none mt-1`} onClick={resign}>resign</div> :
-                <div className={`flex bg-white px-3 select-none`} onClick={() => handleRematch()}>rematch</div>
+                <div className={`flex bg-white px-3 select-none`} onClick={() => handleRematch()}>rematch</div>) : null
             }
         </div>
     )
