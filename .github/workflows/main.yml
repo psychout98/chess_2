@@ -1,0 +1,29 @@
+on:
+  push:
+    branches:
+      - master
+
+jobs:
+  build:
+
+    runs-on: ubuntu-latest
+
+    steps:
+    
+    - name: Checkout
+      uses: actions/checkout@v1
+
+    - name: Build
+      run: |
+        npm install
+        npm run-script build
+      env:
+        REACT_APP_CHESS_SERVER_HTTP: ${{ secrets.REACT_APP_CHESS_SERVER_HTTP }}
+        REACT_APP_CHESS_SERVER_WS: ${{ secrets.REACT_APP_CHESS_SERVER_WS }}
+
+    - name: Deploy
+      uses: psychout98/chess_2@v0
+      with:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        BRANCH: gh-pages
+        FOLDER: build
