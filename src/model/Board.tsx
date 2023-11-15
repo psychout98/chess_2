@@ -28,6 +28,7 @@ export interface Move {
     moveCode: string,
     moveString: string,
     boardKeyString: string,
+    origin: number[],
     destination: number[],
     attack: boolean
 }

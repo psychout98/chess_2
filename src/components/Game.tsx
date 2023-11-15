@@ -12,11 +12,16 @@ export const Game: React.FC<{ board: Board, player: number, move: Function, getB
     const [currentMove, setCurrentMove] = useState<number>(board.currentMove)
     const [viewingMove, setViewingMove] = useState<number>(board.currentMove)
     const [resigning, setResigning] = useState<boolean>(false)
+    const [lastSpots, setLastSpots] = useState<string[]>(['', ''])
 
     useEffect(() => {
         if (board.currentMove !== currentMove) {
             setCurrentMove(board.currentMove)
             setViewingMove(board.currentMove)
+        }
+        if (currentMove > 0) {
+            const lastMoveCode = board.history[board.currentMove]?.moveCode
+            setLastSpots([lastMoveCode.substring(0, 2), lastMoveCode.substring(2, 4)])
         }
     }, [board])
 
@@ -63,8 +68,14 @@ export const Game: React.FC<{ board: Board, player: number, move: Function, getB
                     return <div className={`flex ${player === 2 ? 'flex-row-reverse' : 'flex-row'} w-full h-[12.5%]`} key={i}>
                         {row?.map((key, j) => {
                             let spot = i.toString() + j.toString()
-                            return <div className={`flex relative w-[12.5%] h-full ${i % 2 === 0 ? (j % 2 === 0 ? 'bg-sky-500 text-white' : 'text-sky-500') : (j % 2 === 0 ? 'text-sky-500' : 'bg-sky-500 text-white')}`} key={j}>
-                                <span id={key} className={`flex absolute top-0 left-0 w-full h-full  ${selected === key || moves.includes(spot) ? 'bg-green-400 opacity-50' : ''} ${board.check && key.includes(board.whiteToMove ? 'wk' : 'bk') ? 'bg-red-400' : ''}`} onMouseDown={(e) => {
+                            return <div className={`flex relative w-[12.5%] h-full
+                            ${i % 2 === 0 ? (j % 2 === 0 ? 'bg-sky-500 text-white' : 'text-sky-500') : 
+                            (j % 2 === 0 ? 'text-sky-500' : 'bg-sky-500 text-white')}`} key={j}>
+                                <span id={key} className={`flex absolute top-0 left-0 w-full h-full
+                                ${selected === key ? 'bg-green-300' : 
+                                (moves.includes(spot) ? 'bg-green-300 opacity-60' : 
+                                (spot === lastSpots[0] || spot === lastSpots[1] ? 'bg-indigo-300' : ''))}
+                                ${board.check && key.includes(board.whiteToMove ? 'wk' : 'bk') ? 'bg-red-400' : ''}`} onMouseDown={(e) => {
                                     e.preventDefault()
                                     if (key.startsWith(board.whiteToMove ? 'w' : 'b') && myMove && !board.shallow) {
                                         setSelected(key)
