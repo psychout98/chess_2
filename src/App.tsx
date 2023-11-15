@@ -3,7 +3,7 @@ import { Home } from "./components/Home";
 import './index.css';
 import axios from 'axios';
 
-axios.defaults.baseURL = process.env.CHESS_SERVER_HTTP;
+axios.defaults.baseURL = process.env.REACT_APP_CHESS_SERVER_HTTP;
 axios.defaults.withCredentials = true;
 
 function App(): JSX.Element {

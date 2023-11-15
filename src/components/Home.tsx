@@ -6,8 +6,7 @@ import { Game } from "./Game"
 import { Client } from '@stomp/stompjs';
 
 const client = new Client();
-client.brokerURL = process.env.CHESS_SERVER_WS;
-
+client.brokerURL = process.env.REACT_APP_CHESS_SERVER_WS;
 
 
 export const Home: React.FC = () => {
