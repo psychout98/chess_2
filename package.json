@@ -17,6 +17,7 @@
     "ws": "^8.14.2"
   },
   "scripts": {
+    "local": "REACT_APP_CHESS_SERVER_HTTP=http://localhost:8080 REACT_APP_CHESS_SERVER_WS=ws://localhost:8080 npm run start",
     "predeploy": "npm run build",
     "deploy": "gh-pages -d build",
     "start": "react-scripts start",
