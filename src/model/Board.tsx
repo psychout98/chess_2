@@ -14,7 +14,8 @@ export interface Board {
     check: boolean,
     checkmate: boolean,
     stalemate: boolean,
-    history: { [key: number]: Move }
+    history: { [key: number]: Move },
+    shallow: boolean
 }
 
 export interface Player {

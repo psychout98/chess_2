@@ -1,7 +1,7 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Board, Piece } from "../model/Board";
 
-export const Game: React.FC<{ board: Board, move: Function, player: number }> = ({ board, move, player }) => {
+export const Game: React.FC<{ board: Board, move: Function, getBoard: Function, player: number }> = ({ board, move, getBoard, player }) => {
 
     const [selected, setSelected] = useState<string | undefined>(undefined)
     const [currentSpot, setCurrentSpot] = useState<string>('')
@@ -9,7 +9,20 @@ export const Game: React.FC<{ board: Board, move: Function, player: number }> = 
     const myMove = (board.whiteToMove && player === 1) || (!board.whiteToMove && player === 2)
     const rows = ['1', '2', '3', '4', '5', '6', '7', '8']
     const cols = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h']
+    const [currentMove, setCurrentMove] = useState<number>(board.currentMove)
     const [viewingMove, setViewingMove] = useState<number>(board.currentMove)
+    
+    useEffect(() => {
+        if (board.currentMove !== currentMove) {
+            setCurrentMove(board.currentMove)
+            setViewingMove(board.currentMove)
+        }
+    }, [board])
+
+    function viewMove(move: number) {
+        setViewingMove(move)
+        getBoard(move)
+    }
 
     function getHistory(): JSX.Element[] {
         var historyItems: JSX.Element[] = []
@@ -22,10 +35,10 @@ export const Game: React.FC<{ board: Board, move: Function, player: number }> = 
     function historyItem(move: number, moveString1: string, moveString2: string) {
         const viewingMove1 = viewingMove === move
         const viewingMove2 = viewingMove === move + 1
-        return (<span className="flex flex-nowrap p-1 whitespace-nowrap" key={move}>
+        return (<span className="flex flex-nowrap p-1 whitespace-nowrap select-none" key={move}>
             <span className={`${viewingMove1 ? 'text-white' : ''} ml-1`}>{Math.ceil(move / 2)}.</span>
-            <span className={`${viewingMove1 ? 'text-white' : ''} mx-1`}>{moveString1}</span>
-            <span className={`${viewingMove2 ? 'text-white' : ''} mr-1`}>{moveString2}</span></span>)
+            <span className={`${viewingMove1 ? 'text-white' : ''} mx-1`} onClick={() => viewMove(move)}>{moveString1}</span>
+            <span className={`${viewingMove2 ? 'text-white' : ''} mr-1`} onClick={() => viewMove(move + 1)}>{moveString2}</span></span>)
     }
 
     return (
@@ -43,7 +56,7 @@ export const Game: React.FC<{ board: Board, move: Function, player: number }> = 
                             return <div className={`flex relative w-[12.5%] h-full ${i % 2 === 0 ? (j % 2 === 0 ? 'bg-sky-500 text-white' : 'text-sky-500') : (j % 2 === 0 ? 'text-sky-500' : 'bg-sky-500 text-white')}`} key={j}>
                                 <span id={key} className={`flex absolute top-0 left-0 w-full h-full  ${selected === key || moves.includes(spot) ? 'bg-green-400 opacity-50' : ''} ${board.check && key.includes(board.whiteToMove ? 'wk' : 'bk') ? 'bg-red-400' : ''}`} onMouseDown={(e) => {
                                     e.preventDefault()
-                                        if (key.startsWith(board.whiteToMove ? 'w' : 'b') && myMove) {
+                                        if (key.startsWith(board.whiteToMove ? 'w' : 'b') && myMove && !board.shallow) {
                                             setSelected(key)
                                             setCurrentSpot(spot)
                                             let piece: Piece | undefined = board.pieces[key]

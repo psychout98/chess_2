@@ -48,8 +48,8 @@ export const Home: React.FC = () => {
         }
     }, [board, started])
 
-    function getBoard() {
-        axios.get<BoardResponse>(`board/${boardid || board?.id || ''}`)
+    function getBoard(viewingMove: number | undefined = board?.currentMove) {
+        axios.get<BoardResponse>(`board/${boardid || board?.id || ''}${viewingMove ? `/${viewingMove}` : ''}`)
             .then((result) => {
                 let sessionId = window.sessionStorage.getItem("sessionId")
                 if (!sessionId) {
@@ -97,7 +97,7 @@ export const Home: React.FC = () => {
 
     function mainPanel(): JSX.Element {
         if (board && started) {
-            return <Game board={board} move={move} player={player} />
+            return <Game board={board} move={move} getBoard={getBoard} player={player} />
         } else if (board && !started) {
             if (player === 0) {
                 return <div className="flex bg-white select-none p-3" onClick={joinGame}>Join game</div>
