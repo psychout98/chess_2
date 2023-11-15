@@ -3,8 +3,8 @@ import { Home } from "./components/Home";
 import './index.css';
 import axios from 'axios';
 
-axios.defaults.baseURL = 'https://pacific-refuge-56148-96967b0a6dc5.herokuapp.com/';
-// axios.defaults.baseURL = 'http://localhost:8080/';
+// axios.defaults.baseURL = 'https://pacific-refuge-56148-96967b0a6dc5.herokuapp.com/';
+axios.defaults.baseURL = 'http://localhost:8080/';
 axios.defaults.withCredentials = true;
 
 function App(): JSX.Element {

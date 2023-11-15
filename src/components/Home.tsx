@@ -6,8 +6,8 @@ import { Game } from "./Game"
 import { Client } from '@stomp/stompjs';
 
 const client = new Client();
-client.brokerURL = 'wss://pacific-refuge-56148-96967b0a6dc5.herokuapp.com/';
-// client.brokerURL = 'ws://localhost:8080/';
+// client.brokerURL = 'wss://pacific-refuge-56148-96967b0a6dc5.herokuapp.com/';
+client.brokerURL = 'ws://localhost:8080/';
 
 
 
@@ -17,6 +17,8 @@ export const Home: React.FC = () => {
     const [board, setBoard] = useState<Board>()
     const [player, setPlayer] = useState<number>(0)
     const [subscribed, setSubscribed] = useState<boolean>(false)
+    const [started, setStarted] = useState<boolean>(false)
+    const [sessionId, setSessionId] = useState<string>(window.sessionStorage.getItem("sessionId") || '')
     const navigate = useNavigate()
 
     useEffect(() => {
@@ -27,7 +29,7 @@ export const Home: React.FC = () => {
             client.deactivate()
             client.onConnect = () => {
                 client.subscribe(`/board/${board?.id}`, (message) => {
-                    if (message?.body === 'move') {
+                    if (message?.body === 'update') {
                         getBoard()
                     }
                 })
@@ -35,7 +37,18 @@ export const Home: React.FC = () => {
             }
             client.activate();
         }
-    }, [board])
+        if (board && player === 0) {
+            setSessionId(window.sessionStorage.getItem("sessionId") || '')
+            if (sessionId) {
+                if (board.white?.sessionId === sessionId) {
+                    setPlayer(1)
+                }
+                if (board.black?.sessionId === sessionId) {
+                    setPlayer(2)
+                }
+            }
+        }
+    }, [board, started])
 
     function getBoard() {
         axios.get<BoardResponse>(`board/${boardid || board?.id || ''}`)
@@ -46,8 +59,9 @@ export const Home: React.FC = () => {
                     sessionId = result.data.sessionId
                 }
                 setBoard(result.data.board)
-                setPlayer(result.data.board.white.sessionId === sessionId ? 1 : result.data.board.black.sessionId === sessionId ? 2 : 0)
-                setTimeout(getBoard, 10000)
+                if (result.data.board.white && result.data.board.black) {
+                    setStarted(true)
+                }
             }).catch((error) => {
                 console.log(error)
             })
@@ -56,7 +70,7 @@ export const Home: React.FC = () => {
     function move(moveCode: string) {
         axios.put<BoardResponse>(`board/${board?.id}/move/${moveCode}`)
             .then((result) => {
-                client.publish({ destination: `/board/${board?.id}`, body: 'move' });
+                client.publish({ destination: `/board/${board?.id}`, body: 'update' });
                 setBoard(result.data.board)
             }).catch((error) => {
                 console.log(error)
@@ -68,18 +82,43 @@ export const Home: React.FC = () => {
         axios.post<BoardResponse>('board').then((result) => {
             window.sessionStorage.setItem("sessionId", result.data.sessionId)
             navigate(`/${result.data.board.id}`)
-            setPlayer(result.data.board.white.sessionId === result.data.sessionId ? 1 : result.data.board.black.sessionId === result.data.sessionId ? 2 : 0)
+            setPlayer(1)
             setBoard(result.data.board)
         })
     }
 
+    function joinGame(e: React.MouseEvent<HTMLDivElement, MouseEvent>) {
+        axios.put<String>(`board/${board?.id}/join`)
+            .then((result) => {
+                client.publish({ destination: `/board/${board?.id}`, body: 'update' });
+                window.sessionStorage.setItem("sessionId", result.data.trim())
+                setPlayer(2)
+                setStarted(true)
+            })
+    }
+
+    function mainPanel(): JSX.Element {
+        if (board && started) {
+            return <Game board={board} move={move} player={player} />
+        } else if (board && !started) {
+            if (player === 0) {
+                return <div className="flex bg-white select-none p-3" onClick={joinGame}>Join game</div>
+            } else {
+                return <div>Waiting for opponent...</div>
+            }
+        } else if (!board && !started) {
+            return <div className="flex bg-white select-none p-3" onClick={createGame}>Create game</div>
+        } else {
+            return <div>Impossible error. You should probably just reload</div>
+        }
+    }
+
+
+
     return (
         <div className="flex flex-col w-screen h-screen bg-sky-300 items-center justify-center">
-            <a href="/chess_2/" className="absolute top-0 left-0">home</a>
-            {board ?
-                <Game board={board} move={move} player={player} /> :
-                <div className="flex bg-white select-none p-3" onClick={createGame}>Create game</div>
-            }
+            <a href="/chess_2/" className="flex flex-col absolute top-0 left-0 w-20 h-20 items-center"><img src='/chess_2/bq.png' /></a>
+            {mainPanel()}
         </div>
     )
 }
