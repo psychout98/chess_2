@@ -9,18 +9,14 @@ export const Game: React.FC<{ board: Board, player: number, move: Function, getB
     const myMove = (board.whiteToMove && player === 1) || (!board.whiteToMove && player === 2)
     const rows = ['1', '2', '3', '4', '5', '6', '7', '8']
     const cols = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h']
-    const [currentMove, setCurrentMove] = useState<number>(board.currentMove)
     const [viewingMove, setViewingMove] = useState<number>(board.currentMove)
     const [resigning, setResigning] = useState<boolean>(false)
     const [lastSpots, setLastSpots] = useState<string[]>(['', ''])
 
     useEffect(() => {
-        if (board.currentMove !== currentMove) {
-            setCurrentMove(board.currentMove)
-            setViewingMove(board.currentMove)
-        }
-        if (currentMove > 0) {
-            const lastMoveCode = viewingMove === currentMove ? board.history[board.currentMove]?.moveCode : ''
+        setViewingMove(board.currentMove)
+        if (board.currentMove > 0) {
+            const lastMoveCode = viewingMove === board.currentMove ? board.history[board.currentMove]?.moveCode : ''
             setLastSpots([lastMoveCode.substring(0, 2), lastMoveCode.substring(2, 4)])
         }
     }, [board])
