@@ -14,12 +14,11 @@ export const Game: React.FC<{ board: Board, player: number, move: Function, getB
     const [lastSpots, setLastSpots] = useState<string[]>(['', ''])
 
     useEffect(() => {
-        setViewingMove(board.currentMove)
         if (board.currentMove > 0) {
             const lastMoveCode = viewingMove === board.currentMove ? board.history[board.currentMove]?.moveCode : ''
             setLastSpots([lastMoveCode.substring(0, 2), lastMoveCode.substring(2, 4)])
         }
-    }, [board])
+    }, [board, viewingMove])
 
     function resign(e: React.MouseEvent<HTMLSpanElement, MouseEvent>) {
         if (resigning) {
