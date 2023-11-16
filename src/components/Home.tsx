@@ -40,6 +40,12 @@ export const Home: React.FC = () => {
             }
             client.activate();
         }
+        const sessionStorage = window.sessionStorage.getItem("sessionId")
+        if (sessionStorage && !sessionId) {
+            setSessionId(sessionStorage)
+        } else if (!sessionStorage && sessionId) {
+            window.sessionStorage.setItem("sessionId", sessionId)
+        }
         if (board && player === 0) {
             setSessionId(window.sessionStorage.getItem("sessionId") || '')
             if (sessionId) {
@@ -53,18 +59,11 @@ export const Home: React.FC = () => {
         }
     }, [board, player, subscribed, started, sessionId, rematchOffer])
 
-    function updateSession(session: string) {
-        let sessionId = window.sessionStorage.getItem("sessionId")
-        if (!sessionId) {
-            window.sessionStorage.setItem("sessionId", session)
-            setSessionId(session)
-        }
-    }
 
     function getBoard(viewingMove: number | undefined = undefined) {
-        axios.get<BoardResponse>(`board/${boardid || board?.id || ''}${viewingMove ? `/${viewingMove}` : ''}?sessionId=${sessionId}`)
+        axios.get<BoardResponse>(`board/${boardid || board?.id || ''}${viewingMove ? `/${viewingMove}` : ''}${ sessionId? `?sessionId=${sessionId}`: ''}`)
             .then((result) => {
-                updateSession(result.data.sessionId)
+                setSessionId(result.data.sessionId)
                 setViewingMove(result.data.board.currentMove)
                 setBoard(result.data.board)
                 if (result.data.board.white && result.data.board.black) {
@@ -76,9 +75,9 @@ export const Home: React.FC = () => {
     }
 
     function move(moveCode: string) {
-        axios.put<BoardResponse>(`board/${board?.id}/move/${moveCode}?sessionId=${sessionId}`)
+        axios.put<BoardResponse>(`board/${board?.id}/move/${moveCode}${ sessionId? `?sessionId=${sessionId}`: ''}`)
             .then((result) => {
-                updateSession(result.data.sessionId)
+                setSessionId(result.data.sessionId)
                 client.publish({ destination: `/board/${board?.id}`, body: 'update' });
                 setBoard(result.data.board)
                 setViewingMove(result.data.board.currentMove)
@@ -90,7 +89,7 @@ export const Home: React.FC = () => {
     function createGame(e: React.MouseEvent<HTMLDivElement, MouseEvent>) {
         e.preventDefault()
         axios.post<BoardResponse>(`board${sessionId ? `?sessionId=${sessionId}` : ''}`).then((result) => {
-            updateSession(result.data.sessionId)
+            setSessionId(result.data.sessionId)
             navigate(`/${result.data.board.id}`)
             setPlayer(1)
             setBoard(result.data.board)
@@ -98,10 +97,10 @@ export const Home: React.FC = () => {
     }
 
     function joinGame(e: React.MouseEvent<HTMLDivElement, MouseEvent>) {
-        axios.put<String>(`board/${board?.id}/join?sessionId=${sessionId}`)
+        axios.put<String>(`board/${board?.id}/join${ sessionId? `?sessionId=${sessionId}`: ''}`)
             .then((result) => {
                 client.publish({ destination: `/board/${board?.id}`, body: 'update' });
-                updateSession(result.data.trim())
+                setSessionId(result.data.trim())
                 setPlayer(2)
                 setStarted(true)
             })
@@ -112,9 +111,9 @@ export const Home: React.FC = () => {
             navigate(`/${rematchOffer}`)
             window.location.reload()
         } else {
-            axios.post<BoardResponse>('board').then((result) => {
+            axios.post<BoardResponse>(`board${sessionId ? `?sessionId=${sessionId}` : ''}`).then((result) => {
                 client.publish({ destination: `/board/${board?.id}`, body: `rematch:${result.data.board.id}` });
-                updateSession(result.data.sessionId)
+                setSessionId(result.data.sessionId)
                 navigate(`/${result.data.board.id}`)
                 setPlayer(1)
                 setSubscribed(false)
