@@ -81,8 +81,9 @@ export const Home: React.FC = () => {
     function getBoard(viewingMove: number | undefined = undefined) {
         axios.get<BoardResponse>(`board/${boardid || board?.id || ''}${viewingMove ? `/${viewingMove}` : ''}`)
             .then((result) => {
-                setLocalId(result.data.player.id)
-                setLocalName(result.data.player.name)
+                if (!localId) {
+                    setLocalId(result.data.player.id)
+                }
                 setViewingMove(result.data.board.currentMove)
                 setBoard(result.data.board)
                 if (result.data.board.white && result.data.board.black) {
@@ -96,8 +97,9 @@ export const Home: React.FC = () => {
     function move(moveCode: string) {
         axios.put<BoardResponse>(`board/${board?.id}/move/${moveCode}`)
             .then((result) => {
-                setLocalId(result.data.player.id)
-                setLocalName(result.data.player.name)
+                if (!localId) {
+                    setLocalId(result.data.player.id)
+                }
                 client.publish({ destination: `/board/${board?.id}`, body: 'update' });
                 setBoard(result.data.board)
                 setViewingMove(result.data.board.currentMove)
@@ -109,8 +111,9 @@ export const Home: React.FC = () => {
     function createGame(e: React.MouseEvent<HTMLDivElement, MouseEvent>) {
         e.preventDefault()
         axios.post<BoardResponse>('board').then((result) => {
-            setLocalId(result.data.player.id)
-            setLocalName(result.data.player.name)
+            if (!localId) {
+                setLocalId(result.data.player.id)
+            }
             navigate(`/${result.data.board.id}`)
             setPlayer(1)
             setBoard(result.data.board)
@@ -121,8 +124,9 @@ export const Home: React.FC = () => {
         axios.put<Player>(`board/${board?.id}/join`)
             .then((result) => {
                 client.publish({ destination: `/board/${board?.id}`, body: 'update' });
-                setLocalId(result.data.id)
-                setLocalName(result.data.name)
+                if (!localId) {
+                    setLocalId(result.data.id)
+                }
                 setPlayer(2)
                 setStarted(true)
             })
@@ -135,8 +139,9 @@ export const Home: React.FC = () => {
         } else {
             axios.post<BoardResponse>('board').then((result) => {
                 client.publish({ destination: `/board/${board?.id}`, body: `rematch:${result.data.board.id}` });
-                setLocalId(result.data.player.id)
-                setLocalName(result.data.player.name)
+                if (!localId) {
+                    setLocalId(result.data.player.id)
+                }
                 navigate(`/${result.data.board.id}`)
                 setPlayer(1)
                 setSubscribed(false)
