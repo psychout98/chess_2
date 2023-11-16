@@ -74,6 +74,7 @@ export const Home: React.FC = () => {
     function move(moveCode: string) {
         axios.put<BoardResponse>(`board/${board?.id}/move/${moveCode}?sessionId=${sessionId}`)
             .then((result) => {
+                window.sessionStorage.setItem("sessionId", result.data.sessionId)
                 client.publish({ destination: `/board/${board?.id}`, body: 'update' });
                 setBoard(result.data.board)
                 setViewingMove(result.data.board.currentMove)
