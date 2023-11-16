@@ -42,6 +42,9 @@ export const Home: React.FC = () => {
             setLocalName(localStorageName)
         } else if (!localStorageName && localName) {
             window.localStorage.setItem("localName", localName)
+        } else if (!localStorageName && !localName) {
+            setLocalName('anonymous')
+            window.localStorage.setItem("localName", 'anonymous')
         }
         if (board && player === 0) {
             if (localId === board.white?.id) {
@@ -175,7 +178,7 @@ export const Home: React.FC = () => {
             <div className="flex absolute top-0 right-0">
                 {board ?
                     <div className="w-full h-full">{localName}</div> :
-                    <input type="text" className="w-full h-full text-center bg-white p-3" placeholder="anonymous" onChange={(e) => {
+                    <input type="text" className="w-full h-full text-center bg-white p-3" placeholder={localName || 'anonymous'} onChange={(e) => {
                         setLocalName(e.target.value)
                         window.localStorage.setItem("localName", e.target.value)
                     }}/>

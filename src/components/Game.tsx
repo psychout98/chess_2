@@ -86,7 +86,7 @@ export const Game: React.FC<{ board: Board, player: number, move: Function, view
                                         setMoves([])
                                     }
                                 }}>
-                                    {key !== '' ? <img src={`/chess_2/${key.substring(0, 2)}.png`} /> : null}
+                                    {key !== '' ? <img className="w-full h-full" src={`/chess_2/${key.substring(0, 2)}.png`} /> : null}
                                     {i === 0 ? <span className={`absolute ${player === 0 || player === 1 ? 'bottom-1' : 'top-0'} left-1`}>{cols[j]}</span> : null}
                                     {j === 0 ? <span className={`absolute ${player === 0 || player === 1 ? 'top-0 left-1' : 'bottom-1 right-1'}`}>{rows[i]}</span> : null}
                                 </span>
