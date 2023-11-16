@@ -62,7 +62,7 @@ export const Home: React.FC = () => {
     }
 
     function getBoard(viewingMove: number | undefined = undefined) {
-        axios.get<BoardResponse>(`board/${boardid || board?.id || ''}${viewingMove ? `/${viewingMove}` : ''}`)
+        axios.get<BoardResponse>(`board/${boardid || board?.id || ''}${viewingMove ? `/${viewingMove}` : ''}?sessionId=${sessionId}`)
             .then((result) => {
                 updateSession(result.data.sessionId)
                 setViewingMove(result.data.board.currentMove)
@@ -89,7 +89,7 @@ export const Home: React.FC = () => {
 
     function createGame(e: React.MouseEvent<HTMLDivElement, MouseEvent>) {
         e.preventDefault()
-        axios.post<BoardResponse>('board').then((result) => {
+        axios.post<BoardResponse>(`board${sessionId ? `?sessionId=${sessionId}` : ''}`).then((result) => {
             updateSession(result.data.sessionId)
             navigate(`/${result.data.board.id}`)
             setPlayer(1)
@@ -98,7 +98,7 @@ export const Home: React.FC = () => {
     }
 
     function joinGame(e: React.MouseEvent<HTMLDivElement, MouseEvent>) {
-        axios.put<String>(`board/${board?.id}/join`)
+        axios.put<String>(`board/${board?.id}/join?sessionId=${sessionId}`)
             .then((result) => {
                 client.publish({ destination: `/board/${board?.id}`, body: 'update' });
                 updateSession(result.data.trim())
