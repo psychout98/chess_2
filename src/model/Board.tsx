@@ -1,5 +1,5 @@
 export interface BoardResponse {
-    sessionId: string,
+    player: Player,
     board: Board
 }
 
@@ -21,7 +21,7 @@ export interface Board {
 
 export interface Player {
     name: string,
-    sessionId: string
+    id: string
 }
 
 export interface Move {

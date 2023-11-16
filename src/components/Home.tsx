@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import { Board, BoardResponse } from "../model/Board";
+import { Board, BoardResponse, Player } from "../model/Board";
 import axios from "axios";
 import { Game } from "./Game"
 import { Client } from '@stomp/stompjs';
@@ -17,14 +17,49 @@ export const Home: React.FC = () => {
     const [player, setPlayer] = useState<number>(0)
     const [subscribed, setSubscribed] = useState<boolean>(false)
     const [started, setStarted] = useState<boolean>(false)
-    const [sessionId, setSessionId] = useState<string>(window.sessionStorage.getItem("sessionId") || '')
+    const [localId, setLocalId] = useState<string>()
+    const [localName, setLocalName] = useState<string>()
     const [rematchOffer, setRematchOffer] = useState<string | undefined>()
     const [viewingMove, setViewingMove] = useState<number>(0)
 
     useEffect(() => {
+        setLocalPlayer()
+        setWebSocketConnection()
         if (boardid && !board) {
             getBoard()
         }
+    }, [board, player, subscribed, started, localId, localName, rematchOffer])
+
+    function setLocalPlayer() {
+        const localStorageId = window.localStorage.getItem("localId")
+        const localStorageName = window.localStorage.getItem("localName")
+        if (localStorageId && !localId) {
+            setLocalId(localStorageId)
+        } else if (!localStorageId && localId) {
+            window.localStorage.setItem("localId", localId)
+        }
+        if (localStorageName && !localName) {
+            setLocalName(localStorageName)
+        } else if (!localStorageName && localName) {
+            window.localStorage.setItem("localName", localName)
+        }
+        if (board && player === 0) {
+            if (localId === board.white?.id) {
+                setPlayer(1)
+            }
+            if (localId === board.black?.id) {
+                setPlayer(2)
+            }
+        }
+        if (localId) {
+            axios.defaults.headers.common['playerId'] = localId
+        }
+        if (localName) {
+            axios.defaults.headers.common['playerName'] = localName
+        }
+    }
+
+    function setWebSocketConnection() {
         if (!subscribed) {
             client.deactivate()
             client.onConnect = () => {
@@ -40,30 +75,14 @@ export const Home: React.FC = () => {
             }
             client.activate();
         }
-        const sessionStorage = window.sessionStorage.getItem("sessionId")
-        if (sessionStorage && !sessionId) {
-            setSessionId(sessionStorage)
-        } else if (!sessionStorage && sessionId) {
-            window.sessionStorage.setItem("sessionId", sessionId)
-        }
-        if (board && player === 0) {
-            setSessionId(window.sessionStorage.getItem("sessionId") || '')
-            if (sessionId) {
-                if (board.white?.sessionId === sessionId) {
-                    setPlayer(1)
-                }
-                if (board.black?.sessionId === sessionId) {
-                    setPlayer(2)
-                }
-            }
-        }
-    }, [board, player, subscribed, started, sessionId, rematchOffer])
+    }
 
 
     function getBoard(viewingMove: number | undefined = undefined) {
-        axios.get<BoardResponse>(`board/${boardid || board?.id || ''}${viewingMove ? `/${viewingMove}` : ''}${ sessionId? `?sessionId=${sessionId}`: ''}`)
+        axios.get<BoardResponse>(`board/${boardid || board?.id || ''}${viewingMove ? `/${viewingMove}` : ''}`)
             .then((result) => {
-                setSessionId(result.data.sessionId)
+                setLocalId(result.data.player.id)
+                setLocalName(result.data.player.name)
                 setViewingMove(result.data.board.currentMove)
                 setBoard(result.data.board)
                 if (result.data.board.white && result.data.board.black) {
@@ -75,9 +94,10 @@ export const Home: React.FC = () => {
     }
 
     function move(moveCode: string) {
-        axios.put<BoardResponse>(`board/${board?.id}/move/${moveCode}${ sessionId? `?sessionId=${sessionId}`: ''}`)
+        axios.put<BoardResponse>(`board/${board?.id}/move/${moveCode}`)
             .then((result) => {
-                setSessionId(result.data.sessionId)
+                setLocalId(result.data.player.id)
+                setLocalName(result.data.player.name)
                 client.publish({ destination: `/board/${board?.id}`, body: 'update' });
                 setBoard(result.data.board)
                 setViewingMove(result.data.board.currentMove)
@@ -88,8 +108,9 @@ export const Home: React.FC = () => {
 
     function createGame(e: React.MouseEvent<HTMLDivElement, MouseEvent>) {
         e.preventDefault()
-        axios.post<BoardResponse>(`board${sessionId ? `?sessionId=${sessionId}` : ''}`).then((result) => {
-            setSessionId(result.data.sessionId)
+        axios.post<BoardResponse>('board').then((result) => {
+            setLocalId(result.data.player.id)
+            setLocalName(result.data.player.name)
             navigate(`/${result.data.board.id}`)
             setPlayer(1)
             setBoard(result.data.board)
@@ -97,10 +118,11 @@ export const Home: React.FC = () => {
     }
 
     function joinGame(e: React.MouseEvent<HTMLDivElement, MouseEvent>) {
-        axios.put<String>(`board/${board?.id}/join${ sessionId? `?sessionId=${sessionId}`: ''}`)
+        axios.put<Player>(`board/${board?.id}/join}`)
             .then((result) => {
                 client.publish({ destination: `/board/${board?.id}`, body: 'update' });
-                setSessionId(result.data.trim())
+                setLocalId(result.data.id)
+                setLocalName(result.data.name)
                 setPlayer(2)
                 setStarted(true)
             })
@@ -111,9 +133,10 @@ export const Home: React.FC = () => {
             navigate(`/${rematchOffer}`)
             window.location.reload()
         } else {
-            axios.post<BoardResponse>(`board${sessionId ? `?sessionId=${sessionId}` : ''}`).then((result) => {
+            axios.post<BoardResponse>('board').then((result) => {
                 client.publish({ destination: `/board/${board?.id}`, body: `rematch:${result.data.board.id}` });
-                setSessionId(result.data.sessionId)
+                setLocalId(result.data.player.id)
+                setLocalName(result.data.player.name)
                 navigate(`/${result.data.board.id}`)
                 setPlayer(1)
                 setSubscribed(false)
@@ -143,7 +166,16 @@ export const Home: React.FC = () => {
 
     return (
         <div className="flex flex-col w-screen h-screen bg-sky-300 items-center justify-center">
-            <a href="/chess_2/" className="flex flex-col absolute top-0 left-0 w-20 h-20 items-center"><img src='/chess_2/bk.png' /></a>
+            <a href="/chess_2/" className="flex absolute top-0 left-0 w-20 h-20 items-center"><img src='/chess_2/bk.png' /></a>
+            <div className="flex absolute top-0 right-0">
+                {board ?
+                    <div className="w-full h-full">{localName}</div> :
+                    <input type="text" className="w-full h-full text-center bg-white p-3" placeholder="anonymous" onChange={(e) => {
+                        setLocalName(e.target.value)
+                        window.localStorage.setItem("localName", e.target.value)
+                    }}/>
+                }
+            </div>
             {mainPanel()}
         </div>
     )
