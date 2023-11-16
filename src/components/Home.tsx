@@ -17,10 +17,11 @@ export const Home: React.FC = () => {
     const [player, setPlayer] = useState<number>(0)
     const [subscribed, setSubscribed] = useState<boolean>(false)
     const [started, setStarted] = useState<boolean>(false)
-    const [localId, setLocalId] = useState<string>()
-    const [localName, setLocalName] = useState<string>()
+    const [playerId, setPlayerId] = useState<string>()
+    const [playerName, setPlayerName] = useState<string>()
     const [rematchOffer, setRematchOffer] = useState<string | undefined>()
     const [viewingMove, setViewingMove] = useState<number>(0)
+    const [showOptions, setShowOptions] = useState<boolean>(false)
 
     useEffect(() => {
         setLocalPlayer()
@@ -28,37 +29,37 @@ export const Home: React.FC = () => {
         if (boardid && !board) {
             getBoard()
         }
-    }, [board, player, subscribed, started, localId, localName, rematchOffer])
+    }, [board, player, subscribed, started, playerId, playerName, rematchOffer])
 
     function setLocalPlayer() {
-        const localStorageId = window.localStorage.getItem("localId")
-        const localStorageName = window.localStorage.getItem("localName")
-        if (localStorageId && !localId) {
-            setLocalId(localStorageId)
-        } else if (!localStorageId && localId) {
-            window.localStorage.setItem("localId", localId)
+        const localStorageId = window.localStorage.getItem("playerId")
+        const localStorageName = window.localStorage.getItem("playerName")
+        if (localStorageId && !playerId) {
+            setPlayerId(localStorageId)
+        } else if (!localStorageId && playerId) {
+            window.localStorage.setItem("playerId", playerId)
         }
-        if (localStorageName && !localName) {
-            setLocalName(localStorageName)
-        } else if (!localStorageName && localName) {
-            window.localStorage.setItem("localName", localName)
-        } else if (!localStorageName && !localName) {
-            setLocalName('anonymous')
-            window.localStorage.setItem("localName", 'anonymous')
+        if (localStorageName && !playerName) {
+            setPlayerName(localStorageName)
+        } else if (!localStorageName && playerName) {
+            window.localStorage.setItem("playerName", playerName)
+        } else if (!localStorageName && !playerName) {
+            setPlayerName('anonymous')
+            window.localStorage.setItem("playerName", 'anonymous')
         }
         if (board && player === 0) {
-            if (localId === board.white?.id) {
+            if (playerId === board.white?.id) {
                 setPlayer(1)
             }
-            if (localId === board.black?.id) {
+            if (playerId === board.black?.id) {
                 setPlayer(2)
             }
         }
-        if (localId) {
-            axios.defaults.headers.common['playerId'] = localId
+        if (playerId) {
+            axios.defaults.headers.common['playerId'] = playerId
         }
-        if (localName) {
-            axios.defaults.headers.common['playerName'] = localName
+        if (playerName) {
+            axios.defaults.headers.common['playerName'] = playerName
         }
     }
 
@@ -81,9 +82,9 @@ export const Home: React.FC = () => {
     }
 
     function updateId(id: string) {
-        if (!localId && !window.localStorage.getItem("localId")) {
-            setLocalId(id)
-            window.localStorage.setItem("localId", id)
+        if (!playerId && !window.localStorage.getItem("playerId")) {
+            setPlayerId(id)
+            window.localStorage.setItem("playerId", id)
         }
     }
 
@@ -172,14 +173,14 @@ export const Home: React.FC = () => {
     return (
         <div className="flex flex-col w-screen h-screen bg-sky-300 items-center justify-center">
             <a href="/chess_2/" className="flex absolute top-0 left-0 w-20 h-20 items-center"><img src='/chess_2/bk.png' /></a>
-            <div className="flex absolute top-0 right-0">
-                {board ?
-                    <div className="w-full h-full">{localName}</div> :
-                    <input type="text" className="w-full h-full text-center bg-white p-3" placeholder={localName || 'anonymous'} onChange={(e) => {
-                        setLocalName(e.target.value)
-                        window.localStorage.setItem("localName", e.target.value)
-                    }}/>
-                }
+            <div className={`flex flex-col absolute top-0 right-0 items-right ${showOptions ? 'bg-sky-500' : ''}`}>
+                <div className='p-3 select-none' onClick={() => setShowOptions(!showOptions)}>{playerName}</div>
+                {showOptions ?
+                    <div className="flex flex-col items-right text-right">
+                        <div className="p-3 select-none" onClick={() => navigate('/login')}>login</div>
+                        <div className="p-3 select-none" onClick={() => navigate('/signup')}>signup</div>
+                    </div>
+                    : null}
             </div>
             {mainPanel()}
         </div>

@@ -95,6 +95,7 @@ export const Game: React.FC<{ board: Board, player: number, move: Function, view
                     </div>
                 })}
             </div>
+            <span>{board.white.name + ' vs. ' + board.black.name}</span>
             <span>{board.stalemate ? 'draw' : board.checkmate ? 'checkmate' : board.winner === 0 ? (board.whiteToMove ? 'white to move' : 'black to move') : ''}</span>
             <span>{board.winner === 1 ? 'white wins' : board.winner === 2 ? 'black wins' : null}</span>
             {player !== 0 ? (board.winner === 0 ?
