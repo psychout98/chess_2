@@ -80,13 +80,18 @@ export const Home: React.FC = () => {
         }
     }
 
+    function updateId(id: string) {
+        if (!localId && !window.localStorage.getItem("localId")) {
+            setLocalId(id)
+            window.localStorage.setItem("localId", id)
+        }
+    }
+
 
     function getBoard(viewingMove: number | undefined = undefined) {
         axios.get<BoardResponse>(`board/${boardid || board?.id || ''}${viewingMove ? `/${viewingMove}` : ''}`)
             .then((result) => {
-                if (!localId) {
-                    setLocalId(result.data.player.id)
-                }
+                updateId(result.data.player.id)
                 setViewingMove(result.data.board.currentMove)
                 setBoard(result.data.board)
                 if (result.data.board.white && result.data.board.black) {
@@ -100,10 +105,8 @@ export const Home: React.FC = () => {
     function move(moveCode: string) {
         axios.put<BoardResponse>(`board/${board?.id}/move/${moveCode}`)
             .then((result) => {
-                if (!localId) {
-                    setLocalId(result.data.player.id)
-                }
-                client.publish({ destination: `/board/${board?.id}`, body: 'update' });
+                updateId(result.data.player.id)
+                client.publish({ destination: `/board/${board?.id}`, body: 'update' })
                 setBoard(result.data.board)
                 setViewingMove(result.data.board.currentMove)
             }).catch((error) => {
@@ -114,9 +117,7 @@ export const Home: React.FC = () => {
     function createGame(e: React.MouseEvent<HTMLDivElement, MouseEvent>) {
         e.preventDefault()
         axios.post<BoardResponse>('board').then((result) => {
-            if (!localId) {
-                setLocalId(result.data.player.id)
-            }
+            updateId(result.data.player.id)
             navigate(`/${result.data.board.id}`)
             setPlayer(1)
             setBoard(result.data.board)
@@ -126,10 +127,8 @@ export const Home: React.FC = () => {
     function joinGame(e: React.MouseEvent<HTMLDivElement, MouseEvent>) {
         axios.put<Player>(`board/${board?.id}/join`)
             .then((result) => {
-                client.publish({ destination: `/board/${board?.id}`, body: 'update' });
-                if (!localId) {
-                    setLocalId(result.data.id)
-                }
+                client.publish({ destination: `/board/${board?.id}`, body: 'update' })
+                updateId(result.data.id)
                 setPlayer(2)
                 setStarted(true)
             })
@@ -141,10 +140,8 @@ export const Home: React.FC = () => {
             window.location.reload()
         } else {
             axios.post<BoardResponse>('board').then((result) => {
-                client.publish({ destination: `/board/${board?.id}`, body: `rematch:${result.data.board.id}` });
-                if (!localId) {
-                    setLocalId(result.data.player.id)
-                }
+                client.publish({ destination: `/board/${board?.id}`, body: `rematch:${result.data.board.id}` })
+                updateId(result.data.player.id)
                 navigate(`/${result.data.board.id}`)
                 setPlayer(1)
                 setSubscribed(false)
