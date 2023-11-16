@@ -72,7 +72,7 @@ export const Home: React.FC = () => {
     }
 
     function move(moveCode: string) {
-        axios.put<BoardResponse>(`board/${board?.id}/move/${moveCode}`)
+        axios.put<BoardResponse>(`board/${board?.id}/move/${moveCode}?sessionId=${sessionId}`)
             .then((result) => {
                 client.publish({ destination: `/board/${board?.id}`, body: 'update' });
                 setBoard(result.data.board)
