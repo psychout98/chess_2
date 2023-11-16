@@ -13,8 +13,8 @@ export const Login: React.FC = () => {
         e.preventDefault()
         axios.get<UserResponse>('/user', {
             headers: {
-                username: username,
-                password: password
+                'username': username,
+                'password': password
             }
         }).then((result) => {
             window.localStorage.setItem("playerName", result.data.username)

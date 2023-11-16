@@ -14,10 +14,10 @@ export const Signup: React.FC = () => {
     function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
         e.preventDefault()
         if (password1 === password2) {
-            axios.post<UserResponse>('/user', {
+            axios.post<UserResponse>('/user', null, {
                 headers: {
-                    username: username,
-                    password: password1
+                    'username': username,
+                    'password': password1
                 }
             }).then((result) => {
                 window.localStorage.setItem("playerName", result.data.username)

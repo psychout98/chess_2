@@ -179,6 +179,12 @@ export const Home: React.FC = () => {
                     <div className="flex flex-col items-right text-right">
                         <div className="p-3 select-none" onClick={() => navigate('/login')}>login</div>
                         <div className="p-3 select-none" onClick={() => navigate('/signup')}>signup</div>
+                        <div className="p-3 select-none" onClick={() => {
+                            window.localStorage.setItem("playerName", 'anonymous')
+                            window.localStorage.removeItem("playerId")
+                            setPlayerName(undefined)
+                            setPlayerId(undefined)
+                        }}>logout</div>
                     </div>
                     : null}
             </div>
