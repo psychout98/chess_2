@@ -19,6 +19,7 @@ export const Home: React.FC = () => {
     const [started, setStarted] = useState<boolean>(false)
     const [sessionId, setSessionId] = useState<string>(window.sessionStorage.getItem("sessionId") || '')
     const [rematchOffer, setRematchOffer] = useState<string | undefined>()
+    const [viewingMove, setViewingMove] = useState<number>(0)
 
     useEffect(() => {
         if (boardid && !board) {
@@ -52,7 +53,7 @@ export const Home: React.FC = () => {
         }
     }, [board, player, subscribed, started, sessionId, rematchOffer])
 
-    function getBoard(viewingMove: number | undefined = board?.currentMove) {
+    function getBoard(viewingMove: number | undefined = undefined) {
         axios.get<BoardResponse>(`board/${boardid || board?.id || ''}${viewingMove ? `/${viewingMove}` : ''}`)
             .then((result) => {
                 let sessionId = window.sessionStorage.getItem("sessionId")
@@ -60,6 +61,7 @@ export const Home: React.FC = () => {
                     window.sessionStorage.setItem("sessionId", result.data.sessionId)
                     sessionId = result.data.sessionId
                 }
+                setViewingMove(result.data.board.currentMove)
                 setBoard(result.data.board)
                 if (result.data.board.white && result.data.board.black) {
                     setStarted(true)
@@ -74,6 +76,7 @@ export const Home: React.FC = () => {
             .then((result) => {
                 client.publish({ destination: `/board/${board?.id}`, body: 'update' });
                 setBoard(result.data.board)
+                setViewingMove(result.data.board.currentMove)
             }).catch((error) => {
                 console.log(error)
             })
@@ -118,7 +121,7 @@ export const Home: React.FC = () => {
 
     function mainPanel(): JSX.Element {
         if (board && started) {
-            return <Game board={board} move={move} getBoard={getBoard} player={player} handleRematch={handleRematch} />
+            return <Game board={board} move={move} viewingMove={viewingMove} setViewingMove={setViewingMove} getBoard={getBoard} player={player} handleRematch={handleRematch} />
         } else if (board && !started) {
             if (player === 0) {
                 return <div className="flex bg-white select-none p-3" onClick={joinGame}>Join game</div>

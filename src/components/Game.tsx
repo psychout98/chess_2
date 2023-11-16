@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { Board, Piece } from "../model/Board";
 
-export const Game: React.FC<{ board: Board, player: number, move: Function, getBoard: Function, handleRematch: Function }> = ({ board, player, move, getBoard, handleRematch }) => {
+export const Game: React.FC<{ board: Board, player: number, move: Function, viewingMove: number, setViewingMove: Function, getBoard: Function, handleRematch: Function }> = ({ board, player, move, viewingMove, setViewingMove, getBoard, handleRematch }) => {
 
     const [selected, setSelected] = useState<string | undefined>(undefined)
     const [currentSpot, setCurrentSpot] = useState<string>('')
@@ -9,7 +9,6 @@ export const Game: React.FC<{ board: Board, player: number, move: Function, getB
     const myMove = (board.whiteToMove && player === 1) || (!board.whiteToMove && player === 2)
     const rows = ['1', '2', '3', '4', '5', '6', '7', '8']
     const cols = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h']
-    const [viewingMove, setViewingMove] = useState<number>(board.currentMove)
     const [resigning, setResigning] = useState<boolean>(false)
     const [lastSpots, setLastSpots] = useState<string[]>(['', ''])
 
@@ -18,7 +17,7 @@ export const Game: React.FC<{ board: Board, player: number, move: Function, getB
             const lastMoveCode = viewingMove === board.currentMove ? board.history[board.currentMove]?.moveCode : ''
             setLastSpots([lastMoveCode.substring(0, 2), lastMoveCode.substring(2, 4)])
         }
-    }, [selected, currentSpot, moves, viewingMove, resigning, lastSpots])
+    }, [board])
 
     function resign(e: React.MouseEvent<HTMLSpanElement, MouseEvent>) {
         if (resigning) {
