@@ -118,7 +118,7 @@ export const Home: React.FC = () => {
     }
 
     function joinGame(e: React.MouseEvent<HTMLDivElement, MouseEvent>) {
-        axios.put<Player>(`board/${board?.id}/join}`)
+        axios.put<Player>(`board/${board?.id}/join`)
             .then((result) => {
                 client.publish({ destination: `/board/${board?.id}`, body: 'update' });
                 setLocalId(result.data.id)
