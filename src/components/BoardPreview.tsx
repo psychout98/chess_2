@@ -36,7 +36,7 @@ export const BoardPreview: React.FC<{ board: Board }> = ({ board }) => {
                 })}
             </div>
             <div className="flex flex-row">
-                <span className="select-none mr-1">{board.stalemate ? 'draw - ' : board.checkmate ? 'checkmate - ' : board.winner === 0 ? (board.whiteToMove ? 'white to move' : 'black to move') : ''}</span>
+                <span className="select-none mr-1">{board.stalemate ? 'draw - ' : board.checkmate ? 'checkmate - ' : board.winner === 0 ? (board.whiteToMove ? 'white to move' : 'black to move') : board.winner === 1 ? 'black resigned - ' : 'white resigned - '}</span>
                 <span className="select-none">{board.winner === 1 ? 'white wins' : board.winner === 2 ? 'black wins' : null}</span>
             </div>
         </div>
