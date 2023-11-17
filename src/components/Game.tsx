@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import { Board, Piece } from "../model/Board";
 
 export const Game: React.FC<{ board: Board, player: number, move: Function, viewingMove: number, setViewingMove: Function, getBoard: Function, handleRematch: Function }> = ({ board, player, move, viewingMove, setViewingMove, getBoard, handleRematch }) => {
@@ -11,6 +12,7 @@ export const Game: React.FC<{ board: Board, player: number, move: Function, view
     const cols = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h']
     const [resigning, setResigning] = useState<boolean>(false)
     const [lastSpots, setLastSpots] = useState<string[]>(['', ''])
+    const navigate = useNavigate()
 
     useEffect(() => {
         if (board.currentMove > 0) {
@@ -63,29 +65,29 @@ export const Game: React.FC<{ board: Board, player: number, move: Function, view
                         {row?.map((key, j) => {
                             let spot = i.toString() + j.toString()
                             return <div className={`flex relative w-[12.5%] h-full
-                            ${i % 2 === 0 ? (j % 2 === 0 ? 'bg-sky-500 text-white' : 'text-sky-500') : 
-                            (j % 2 === 0 ? 'text-sky-500' : 'bg-sky-500 text-white')}`} key={j}>
+                            ${i % 2 === 0 ? (j % 2 === 0 ? 'bg-sky-500 text-white' : 'text-sky-500') :
+                                    (j % 2 === 0 ? 'text-sky-500' : 'bg-sky-500 text-white')}`} key={j}>
                                 <span id={key} className={`flex absolute top-0 left-0 w-full h-full
-                                ${selected === key ? 'bg-green-300' : 
-                                (moves.includes(spot) ? 'bg-green-300 opacity-50' : 
-                                (spot === lastSpots[0] ?  'bg-indigo-300 opacity-60' : (spot === lastSpots[1] ? 'bg-indigo-300' : '')))}
+                                ${selected === key ? 'bg-green-300' :
+                                        (moves.includes(spot) ? 'bg-green-300 opacity-50' :
+                                            (spot === lastSpots[0] ? 'bg-indigo-300 opacity-60' : (spot === lastSpots[1] ? 'bg-indigo-300' : '')))}
                                 ${board.check && key.includes(board.whiteToMove ? 'wk' : 'bk') ? 'bg-red-400' : ''}`} onMouseDown={(e) => {
-                                    e.preventDefault()
-                                    if (key.startsWith(board.whiteToMove ? 'w' : 'b') && myMove && !board.shallow) {
-                                        setSelected(key)
-                                        setCurrentSpot(spot)
-                                        let piece: Piece | undefined = board.pieces[key]
-                                        if (piece) {
-                                            let pieceMoves: string[] | undefined = piece.moves.map(move => move.destination[0].toString() + move.destination[1].toString())
-                                            setMoves(pieceMoves)
+                                        e.preventDefault()
+                                        if (key.startsWith(board.whiteToMove ? 'w' : 'b') && myMove && !board.shallow) {
+                                            setSelected(key)
+                                            setCurrentSpot(spot)
+                                            let piece: Piece | undefined = board.pieces[key]
+                                            if (piece) {
+                                                let pieceMoves: string[] | undefined = piece.moves.map(move => move.destination[0].toString() + move.destination[1].toString())
+                                                setMoves(pieceMoves)
+                                            }
+                                        } else if (moves.includes(spot)) {
+                                            move(currentSpot + spot)
+                                            setSelected(undefined)
+                                            setCurrentSpot('')
+                                            setMoves([])
                                         }
-                                    } else if (moves.includes(spot)) {
-                                        move(currentSpot + spot)
-                                        setSelected(undefined)
-                                        setCurrentSpot('')
-                                        setMoves([])
-                                    }
-                                }}>
+                                    }}>
                                     {key !== '' ? <img className="w-full h-full" src={`/chess_2/${key.substring(0, 2)}.png`} /> : null}
                                     {i === 0 ? <span className={`absolute ${player === 0 || player === 1 ? 'bottom-1' : 'top-0'} left-1`}>{cols[j]}</span> : null}
                                     {j === 0 ? <span className={`absolute ${player === 0 || player === 1 ? 'top-0 left-1' : 'bottom-1 right-1'}`}>{rows[i]}</span> : null}
@@ -95,9 +97,17 @@ export const Game: React.FC<{ board: Board, player: number, move: Function, view
                     </div>
                 })}
             </div>
-            <span>{board.white.name + ' vs. ' + board.black.name}</span>
-            <span>{board.stalemate ? 'draw' : board.checkmate ? 'checkmate' : board.winner === 0 ? (board.whiteToMove ? 'white to move' : 'black to move') : ''}</span>
-            <span>{board.winner === 1 ? 'white wins' : board.winner === 2 ? 'black wins' : null}</span>
+            <div className="flex flex-row">
+                <span className="mx-1 select-none hover:text-white" onClick={board.white?.name === 'anonymous' ? () => { } : () => navigate(`/player/${board.white?.name}`)}>
+                    {board.white?.name}
+                </span>
+                <span>vs.</span>
+                <span className="mx-1 select-none hover:text-white" onClick={board.white?.name === 'anonymous' ? () => { } : () => navigate(`/player/${board.black?.name}`)}>
+                    {board.black?.name}
+                </span>
+            </div>
+            <span className="select-none">{board.stalemate ? 'draw' : board.checkmate ? 'checkmate' : board.winner === 0 ? (board.whiteToMove ? 'white to move' : 'black to move') : ''}</span>
+            <span className="select-none">{board.winner === 1 ? 'white wins' : board.winner === 2 ? 'black wins' : null}</span>
             {player !== 0 ? (board.winner === 0 ?
                 <div className={`flex ${resigning ? 'bg-red-300' : 'bg-white'} px-3 select-none mt-1`} onClick={resign}>resign</div> :
                 <div className={`flex bg-white px-3 select-none`} onClick={() => handleRematch()}>rematch</div>) : null

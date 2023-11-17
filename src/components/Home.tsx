@@ -173,13 +173,14 @@ export const Home: React.FC = () => {
     return (
         <div className="flex flex-col w-screen h-screen bg-sky-300 items-center justify-center">
             <a href="/chess_2/" className="flex absolute top-0 left-0 w-20 h-20 items-center"><img src='/chess_2/bk.png' /></a>
-            <div className={`flex flex-col absolute top-0 right-0 items-right ${showOptions ? 'bg-sky-500' : ''}`}>
-                <div className='p-3 select-none' onClick={() => setShowOptions(!showOptions)}>{playerName}</div>
+            <div className={`flex flex-col absolute top-0 right-0 items-right text-right ${showOptions ? 'bg-sky-500' : ''}`}>
+                <div className='p-3 select-none hover:text-white' onClick={() => setShowOptions(!showOptions)}>{playerName}</div>
                 {showOptions ?
-                    <div className="flex flex-col items-right text-right">
-                        <div className="p-3 select-none" onClick={() => navigate('/login')}>login</div>
-                        <div className="p-3 select-none" onClick={() => navigate('/signup')}>signup</div>
-                        <div className="p-3 select-none" onClick={() => {
+                    <div className="flex flex-col items-right">
+                        {playerName === 'anonymous' ? null : <div className="p-3 select-none hover:text-white" onClick={() => navigate(`/player/${playerName}`)}>profile</div>}
+                        {playerName === 'anonymous' ? <div className="p-3 select-none hover:text-white" onClick={() => navigate('/login')}>login</div> : null}
+                        {playerName === 'anonymous' ? <div className="p-3 select-none hover:text-white" onClick={() => navigate('/signup')}>signup</div> : null}
+                        <div className="p-3 select-none hover:text-white" onClick={() => {
                             window.localStorage.setItem("playerName", 'anonymous')
                             window.localStorage.removeItem("playerId")
                             setPlayerName(undefined)
