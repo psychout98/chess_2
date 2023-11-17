@@ -48,8 +48,8 @@ export const Game: React.FC<{ board: Board, player: number, move: Function, view
         const viewingMove2 = viewingMove === move + 1
         return (<span className="flex flex-nowrap p-1 whitespace-nowrap select-none" key={move}>
             <span className={`${viewingMove1 ? 'text-white' : ''} ml-1`}>{Math.ceil(move / 2)}.</span>
-            <span className={`${viewingMove1 ? 'text-white' : ''} mx-1`} onClick={() => viewMove(move)}>{moveString1}</span>
-            <span className={`${viewingMove2 ? 'text-white' : ''} mr-1`} onClick={() => viewMove(move + 1)}>{moveString2}</span></span>)
+            <span className={`${viewingMove1 ? 'text-white' : ''} hover:text-white mx-1`} onClick={() => viewMove(move)}>{moveString1}</span>
+            <span className={`${viewingMove2 ? 'text-white' : ''} hover:text-white mr-1`} onClick={() => viewMove(move + 1)}>{moveString2}</span></span>)
     }
 
     return (

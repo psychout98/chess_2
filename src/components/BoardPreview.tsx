@@ -8,7 +8,7 @@ export const BoardPreview: React.FC<{ board: Board }> = ({ board }) => {
     const cols = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h']
 
     return (
-        <div>
+        <div className="flex flex-col mb-5">
             <div className="flex flex-row">
                 <span className="mx-1 select-none hover:text-white" onClick={board.white?.name === 'anonymous' ? () => { } : () => navigate(`/player/${board.white?.name}`)}>
                     {board.white?.name}
@@ -34,6 +34,10 @@ export const BoardPreview: React.FC<{ board: Board }> = ({ board }) => {
                         })}
                     </div>
                 })}
+            </div>
+            <div className="flex flex-row">
+                <span className="select-none mr-1">{board.stalemate ? 'draw - ' : board.checkmate ? 'checkmate - ' : board.winner === 0 ? (board.whiteToMove ? 'white to move' : 'black to move') : ''}</span>
+                <span className="select-none">{board.winner === 1 ? 'white wins' : board.winner === 2 ? 'black wins' : null}</span>
             </div>
         </div>
     )
