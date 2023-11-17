@@ -98,11 +98,11 @@ export const Game: React.FC<{ board: Board, player: number, move: Function, view
                 })}
             </div>
             <div className="flex flex-row">
-                <span className="mx-1 select-none hover:text-white" onClick={board.white?.name === 'anonymous' ? () => { } : () => navigate(`/player/${board.white?.name}`)}>
+                <span className="mx-1 select-none hover:text-white" onClick={board.white?.name === 'anonymous' ? () => {} : () => navigate(`/player/${board.white?.name}`)}>
                     {board.white?.name}
                 </span>
                 <span>vs.</span>
-                <span className="mx-1 select-none hover:text-white" onClick={board.white?.name === 'anonymous' ? () => { } : () => navigate(`/player/${board.black?.name}`)}>
+                <span className="mx-1 select-none hover:text-white" onClick={board.black?.name === 'anonymous' ? () => {} : () => navigate(`/player/${board.black?.name}`)}>
                     {board.black?.name}
                 </span>
             </div>
