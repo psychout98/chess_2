@@ -23,6 +23,7 @@ export const Home: React.FC = () => {
     const [rematchOffer, setRematchOffer] = useState<string | undefined>()
     const [viewingMove, setViewingMove] = useState<number>(0)
     const [showOptions, setShowOptions] = useState<boolean>(false)
+    const [showGameSettings, setShowGameSettings] = useState<boolean>(false)
 
     useEffect(() => {
         setLocalPlayer()
@@ -30,7 +31,7 @@ export const Home: React.FC = () => {
         if (boardid && !board) {
             getBoard()
         }
-    }, [board, player, subscribed, started, playerId, playerName, rematchOffer])
+    }, [board, player, subscribed, started, playerId, playerName, rematchOffer, showGameSettings])
 
     function setLocalPlayer() {
         const localStorageId = window.localStorage.getItem("playerId")
@@ -116,9 +117,8 @@ export const Home: React.FC = () => {
             })
     }
 
-    function createGame(e: React.MouseEvent<HTMLDivElement, MouseEvent>) {
-        e.preventDefault()
-        axios.post<BoardResponse>('board').then((result) => {
+    function createGame(opponent: boolean) {
+        axios.post<BoardResponse>('board?opponent=computer').then((result) => {
             updateId(result.data.player.id)
             navigate(`/${result.data.board.id}`)
             setPlayer(1)
@@ -166,7 +166,21 @@ export const Home: React.FC = () => {
                     </div>
             }
         } else if (!board && !started) {
-            return <div className="flex bg-white select-none p-3" onClick={createGame}>Create game</div>
+            return showGameSettings ? <div className="flex flex-col items-center gap-3">
+                <div className="flex bg-white select-none p-3" onClick={ (e) => {
+                    e.preventDefault()
+                    createGame(true)
+                }}>Play with a friend</div>
+                or
+                <div className="flex bg-white select-none p-3" onClick={ (e) => {
+                    e.preventDefault()
+                    createGame(false)
+                }}>Play against the computer</div>
+            </div> :
+            <div className="flex bg-white select-none p-3" onClick={(e) => {
+                e.preventDefault()
+                setShowGameSettings(true) 
+            }}>Create game</div>
         } else {
             return <div>Impossible error. You should probably just reload</div>
         }
