@@ -118,21 +118,29 @@ export const Home: React.FC = () => {
     }
 
     function createGame(opponent: boolean) {
-        axios.post<BoardResponse>('board?opponent=computer').then((result) => {
+        axios.post<BoardResponse>(`board${opponent ? '' : '?opponent=computer'}`).then((result) => {
             updateId(result.data.player.id)
             navigate(`/${result.data.board.id}`)
             setPlayer(1)
             setBoard(result.data.board)
+            if (result.data.board.white && result.data.board.black) {
+                setStarted(true)
+            }
+        }).catch((error) => {
+            console.log(error)
         })
     }
 
     function joinGame(e: React.MouseEvent<HTMLDivElement, MouseEvent>) {
+        e.preventDefault()
         axios.put<Player>(`board/${board?.id}/join`)
             .then((result) => {
                 client.publish({ destination: `/board/${board?.id}`, body: 'update' })
                 updateId(result.data.id)
                 setPlayer(2)
                 setStarted(true)
+            }).catch((error) => {
+                console.log(error)
             })
     }
 
@@ -149,6 +157,8 @@ export const Home: React.FC = () => {
                 setSubscribed(false)
                 setStarted(false)
                 setBoard(result.data.board)
+            }).catch((error) => {
+                console.log(error)
             })
         }
     }
