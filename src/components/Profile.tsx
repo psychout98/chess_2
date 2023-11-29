@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import axios from "axios";
-import { Board, BoardResponse, Player } from "../model/Board";
+import { Board } from "../model/Board";
 import { BoardPreview } from "./BoardPreview";
 
 
@@ -35,7 +35,7 @@ export const Profile: React.FC = () => {
 
     return (
         <div className="flex flex-col w-screen bg-sky-300 items-center justify-center">
-            <a href="/chess_2/" className="flex absolute top-0 left-0 w-20 h-20 items-center"><img src='/chess_2/bk.png' /></a>
+            <a href="/chess_2/" className="flex absolute top-0 left-0 w-20 h-20 items-center"><img src='/chess_2/bk.png' alt="/chess_2/bp.png" /></a>
             <span className="text-xl my-5">{playerName}'s games</span>
             <span>Games: {games}</span>
             <span className="mb-3">Wins: {wins}</span>

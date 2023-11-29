@@ -4,6 +4,7 @@ import { Board, BoardResponse, Player } from "../model/Board";
 import axios from "axios";
 import { Game } from "./Game"
 import { Client } from '@stomp/stompjs';
+import { CopyToClipboard } from 'react-copy-to-clipboard'
 
 const client = new Client();
 client.brokerURL = process.env.REACT_APP_CHESS_SERVER_WS;
@@ -159,7 +160,10 @@ export const Home: React.FC = () => {
             if (player === 0) {
                 return <div className="flex bg-white select-none p-3" onClick={joinGame}>Join game</div>
             } else {
-                return <div>Waiting for opponent...</div>
+                return <div className="flex flex-col items-center">
+                        <span>Waiting for opponent...</span>
+                        <CopyToClipboard text={`https://psychout98.github.io/chess_2/#/${board.id}`} onCopy={() => { alert("Game link copied to clipboard") }}><span className="flex bg-white mt-1 select-none p-1">copy link</span></CopyToClipboard>
+                    </div>
             }
         } else if (!board && !started) {
             return <div className="flex bg-white select-none p-3" onClick={createGame}>Create game</div>
@@ -172,7 +176,7 @@ export const Home: React.FC = () => {
 
     return (
         <div className="flex flex-col w-screen h-screen bg-sky-300 items-center justify-center">
-            <a href="/chess_2/" className="flex absolute top-0 left-0 w-20 h-20 items-center"><img src='/chess_2/bk.png' /></a>
+            <a href="/chess_2/" className="flex absolute top-0 left-0 w-20 h-20 items-center"><img src='/chess_2/bk.png' alt="/chess_2/bp.png" /></a>
             <div className={`flex flex-col absolute top-0 right-0 items-right text-right ${showOptions ? 'bg-sky-500' : ''}`}>
                 <div className='p-3 select-none hover:text-white' onClick={() => setShowOptions(!showOptions)}>{playerName}</div>
                 {showOptions ?

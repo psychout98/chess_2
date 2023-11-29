@@ -34,7 +34,7 @@ export const Signup: React.FC = () => {
 
     return (
         <div className='flex flex-col w-screen h-screen bg-sky-300 items-center justify-center'>
-            <a href="/chess_2/" className="flex absolute top-0 left-0 w-20 h-20 items-center"><img src='/chess_2/bk.png' /></a>
+            <a href="/chess_2/" className="flex absolute top-0 left-0 w-20 h-20 items-center"><img src='/chess_2/bk.png' alt="/chess_2/bp.png" /></a>
             <form className='flex flex-col bg-sky-500 p-5' onSubmit={handleSubmit}>
                 <span className='text-center text-xl'>Sign up</span>
                 <input type='text' className='my-3 p-1' placeholder='username' onChange={(e) => setUsername(e.target.value)} />

@@ -26,7 +26,7 @@ export const BoardPreview: React.FC<{ board: Board }> = ({ board }) => {
                             ${i % 2 === 0 ? (j % 2 === 0 ? 'bg-sky-500 text-white' : 'text-sky-500') :
                                     (j % 2 === 0 ? 'text-sky-500' : 'bg-sky-500 text-white')}`} key={j}>
                                 <span id={key} className="flex absolute top-0 left-0 w-full h-full">
-                                    {key !== '' ? <img className="w-full h-full" src={`/chess_2/${key.substring(0, 2)}.png`} /> : null}
+                                    {key !== '' ? <img className="w-full h-full" src={`/chess_2/${key.substring(0, 2)}.png`} alt="/chess_2/bp.png" /> : null}
                                     {i === 0 ? <span className="absolute bottom-1 right-1">{cols[j]}</span> : null}
                                     {j === 0 ? <span className="absolute top-0 left-1">{rows[i]}</span> : null}
                                 </span>

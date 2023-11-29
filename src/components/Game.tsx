@@ -19,7 +19,7 @@ export const Game: React.FC<{ board: Board, player: number, move: Function, view
             const lastMoveCode = viewingMove === board.currentMove ? board.history[board.currentMove]?.moveCode : ''
             setLastSpots([lastMoveCode.substring(0, 2), lastMoveCode.substring(2, 4)])
         }
-    }, [board])
+    }, [board, viewingMove])
 
     function resign(e: React.MouseEvent<HTMLSpanElement, MouseEvent>) {
         if (resigning) {
@@ -88,7 +88,7 @@ export const Game: React.FC<{ board: Board, player: number, move: Function, view
                                             setMoves([])
                                         }
                                     }}>
-                                    {key !== '' ? <img className="w-full h-full" src={`/chess_2/${key.substring(0, 2)}.png`} /> : null}
+                                    {key !== '' ? <img className="w-full h-full" src={`/chess_2/${key.substring(0, 2)}.png`} alt="/chess_2/bp.png" /> : null}
                                     {i === 0 ? <span className={`absolute ${player === 0 || player === 1 ? 'bottom-1 right-1' : 'top-0 left-1'}`}>{cols[j]}</span> : null}
                                     {j === 0 ? <span className={`absolute ${player === 0 || player === 1 ? 'top-0 left-1' : 'bottom-1 right-1'}`}>{rows[i]}</span> : null}
                                 </span>
