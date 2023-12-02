@@ -95,7 +95,7 @@ export const Home: React.FC = () => {
         axios.get<BoardResponse>(`board/${boardid || board?.id || ''}${viewingMove ? `/${viewingMove}` : ''}`)
             .then((result) => {
                 updateId(result.data.player.id)
-                setViewingMove(result.data.board.currentMove)
+                setViewingMove(viewingMove || Object.keys(result.data.board.history).length - 1)
                 setBoard(result.data.board)
                 if (result.data.board.white && result.data.board.black) {
                     setStarted(true)
@@ -111,7 +111,7 @@ export const Home: React.FC = () => {
                 updateId(result.data.player.id)
                 client.publish({ destination: `/board/${board?.id}`, body: 'update' })
                 setBoard(result.data.board)
-                setViewingMove(result.data.board.currentMove)
+                setViewingMove(Object.keys(result.data.board.history).length - 1)
             }).catch((error) => {
                 console.log(error)
             })
@@ -149,7 +149,9 @@ export const Home: React.FC = () => {
             navigate(`/${rematchOffer}`)
             window.location.reload()
         } else {
-            axios.post<BoardResponse>('board').then((result) => {
+            console.log(board)
+            let opponent = board?.black.name !== 'computer'
+            axios.post<BoardResponse>(`board${opponent ? '' : '?opponent=computer'}`).then((result) => {
                 client.publish({ destination: `/board/${board?.id}`, body: `rematch:${result.data.board.id}` })
                 updateId(result.data.player.id)
                 navigate(`/${result.data.board.id}`)
@@ -157,6 +159,9 @@ export const Home: React.FC = () => {
                 setSubscribed(false)
                 setStarted(false)
                 setBoard(result.data.board)
+                if (result.data.board.white && result.data.board.black) {
+                    setStarted(true)
+                }
             }).catch((error) => {
                 console.log(error)
             })
