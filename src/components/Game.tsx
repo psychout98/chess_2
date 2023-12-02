@@ -15,8 +15,9 @@ export const Game: React.FC<{ board: Board, player: number, move: Function, view
     const navigate = useNavigate()
 
     useEffect(() => {
-        if (board.currentMove > 0) {
-            const lastMoveCode = viewingMove === board.currentMove ? board.history[board.currentMove]?.moveCode : ''
+        const currentMove = Object.keys(board.history).length - 1;
+        if (currentMove > 0) {
+            const lastMoveCode = board.history[viewingMove]?.moveCode || ''
             setLastSpots([lastMoveCode.substring(0, 2), lastMoveCode.substring(2, 4)])
         }
     }, [board, viewingMove])
@@ -78,7 +79,7 @@ export const Game: React.FC<{ board: Board, player: number, move: Function, view
                                             setCurrentSpot(spot)
                                             let piece: Piece | undefined = board.pieces[key]
                                             if (piece) {
-                                                let pieceMoves: string[] | undefined = piece.moves.map(move => move.destination[0].toString() + move.destination[1].toString())
+                                                let pieceMoves: string[] | undefined = piece.moves.filter(moveCode => board.moves[moveCode]?.valid || false).map(moveCode => moveCode.substring(2, 4))
                                                 setMoves(pieceMoves)
                                             }
                                         } else if (moves.includes(spot)) {
