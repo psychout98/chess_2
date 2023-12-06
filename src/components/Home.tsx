@@ -5,6 +5,7 @@ import axios from "axios";
 import { Game } from "./Game"
 import { Client } from '@stomp/stompjs';
 import { CopyToClipboard } from 'react-copy-to-clipboard'
+import { Options } from "./Options";
 
 const client = new Client();
 client.brokerURL = process.env.REACT_APP_CHESS_SERVER_WS;
@@ -23,7 +24,6 @@ export const Home: React.FC = () => {
     const [rematchOffer, setRematchOffer] = useState<string | undefined>()
     const [viewingMove, setViewingMove] = useState<number>(0)
     const [showOptions, setShowOptions] = useState<boolean>(false)
-    const [showGameSettings, setShowGameSettings] = useState<boolean>(false);
 
     useEffect(() => {
         setLocalPlayer()
@@ -31,7 +31,7 @@ export const Home: React.FC = () => {
         if (boardid && !board) {
             getBoard()
         }
-    }, [board, player, subscribed, started, playerId, playerName, rematchOffer, showGameSettings])
+    }, [board, player, subscribed, started, playerId, playerName, rematchOffer])
 
     function setLocalPlayer() {
         const localStorageId = window.localStorage.getItem("playerId")
@@ -117,11 +117,10 @@ export const Home: React.FC = () => {
             })
     }
 
-    function createGame(opponent: boolean) {
-        axios.post<BoardResponse>(`board${opponent ? '' : '?opponentName=computer&opponentId=computer-4'}`).then((result) => {
+    function createGame(white: boolean, opponent: Player | undefined) {
+        axios.post<BoardResponse>(`board?white=${white}${opponent ? `&opponentName=${opponent.name}&opponentId=${opponent.id}` : ''}`).then((result) => {
             updateId(result.data.player.id)
             navigate(`/${result.data.board.id}`)
-            setPlayer(1)
             setBoard(result.data.board)
             if (result.data.board.white && result.data.board.black) {
                 setStarted(true)
@@ -137,7 +136,6 @@ export const Home: React.FC = () => {
             .then((result) => {
                 client.publish({ destination: `/board/${board?.id}`, body: 'update' })
                 updateId(result.data.id)
-                setPlayer(2)
                 setStarted(true)
             }).catch((error) => {
                 console.log(error)
@@ -176,26 +174,12 @@ export const Home: React.FC = () => {
                 return <div className="flex bg-white select-none p-3" onClick={joinGame}>Join game</div>
             } else {
                 return <div className="flex flex-col items-center">
-                        <span>Waiting for opponent...</span>
-                        <CopyToClipboard text={`https://psychout98.github.io/chess_2/#/${board.id}`} onCopy={() => { alert("Game link copied to clipboard") }}><span className="flex bg-white mt-1 select-none p-1">copy link</span></CopyToClipboard>
-                    </div>
+                    <span>Waiting for opponent...</span>
+                    <CopyToClipboard text={`https://psychout98.github.io/chess_2/#/${board.id}`} onCopy={() => { alert("Game link copied to clipboard") }}><span className="flex bg-white mt-1 select-none p-1">copy link</span></CopyToClipboard>
+                </div>
             }
         } else if (!board && !started) {
-            return showGameSettings ? <div className="flex flex-col items-center gap-3">
-                <div className="flex bg-white select-none p-3" onClick={ (e) => {
-                    e.preventDefault()
-                    createGame(true)
-                }}>Play with a friend</div>
-                or
-                <div className="flex bg-white select-none p-3" onClick={ (e) => {
-                    e.preventDefault()
-                    createGame(false)
-                }}>Play against the computer</div>
-            </div> :
-            <div className="flex bg-white select-none p-3" onClick={(e) => {
-                e.preventDefault()
-                setShowGameSettings(true) 
-            }}>Create game</div>
+            return <Options createGame={createGame}/>
         } else {
             return <div>Impossible error. You should probably just reload</div>
         }
