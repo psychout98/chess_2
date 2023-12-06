@@ -23,7 +23,7 @@ export const Home: React.FC = () => {
     const [rematchOffer, setRematchOffer] = useState<string | undefined>()
     const [viewingMove, setViewingMove] = useState<number>(0)
     const [showOptions, setShowOptions] = useState<boolean>(false)
-    const [showGameSettings, setShowGameSettings] = useState<boolean>(false)
+    const [showGameSettings, setShowGameSettings] = useState<boolean>(false);
 
     useEffect(() => {
         setLocalPlayer()
@@ -94,9 +94,9 @@ export const Home: React.FC = () => {
     function getBoard(viewingMove: number | undefined = undefined) {
         axios.get<BoardResponse>(`board/${boardid || board?.id || ''}${viewingMove ? `/${viewingMove}` : ''}`)
             .then((result) => {
+                setBoard(result.data.board)
                 updateId(result.data.player.id)
                 setViewingMove(viewingMove || Object.keys(result.data.board.history).length - 1)
-                setBoard(result.data.board)
                 if (result.data.board.white && result.data.board.black) {
                     setStarted(true)
                 }
@@ -118,7 +118,7 @@ export const Home: React.FC = () => {
     }
 
     function createGame(opponent: boolean) {
-        axios.post<BoardResponse>(`board${opponent ? '' : '?opponent=computer'}`).then((result) => {
+        axios.post<BoardResponse>(`board${opponent ? '' : '?opponentName=computer&opponentId=computer-4'}`).then((result) => {
             updateId(result.data.player.id)
             navigate(`/${result.data.board.id}`)
             setPlayer(1)
@@ -151,7 +151,7 @@ export const Home: React.FC = () => {
         } else {
             console.log(board)
             let opponent = board?.black.name !== 'computer'
-            axios.post<BoardResponse>(`board${opponent ? '' : '?opponent=computer'}`).then((result) => {
+            axios.post<BoardResponse>(`board${opponent ? '' : '?opponentName=computer&opponentId=computer-1'}`).then((result) => {
                 client.publish({ destination: `/board/${board?.id}`, body: `rematch:${result.data.board.id}` })
                 updateId(result.data.player.id)
                 navigate(`/${result.data.board.id}`)
