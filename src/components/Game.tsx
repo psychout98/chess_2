@@ -31,6 +31,11 @@ export const Game: React.FC<{ board: Board, player: number, move: Function, view
         }
     }
 
+    function rematch(e: React.MouseEvent<HTMLSpanElement, MouseEvent>) {
+        e.preventDefault()
+        handleRematch()
+    }
+
     function viewMove(move: number) {
         setViewingMove(move)
         getBoard(move)
@@ -111,7 +116,7 @@ export const Game: React.FC<{ board: Board, player: number, move: Function, view
             <span className="select-none">{board.winner === 1 ? 'white wins' : board.winner === 2 ? 'black wins' : null}</span>
             {player !== 0 ? (board.winner === 0 ?
                 <div className={`flex ${resigning ? 'bg-red-300' : 'bg-white'} px-3 select-none mt-1`} onClick={resign}>resign</div> :
-                <div className={`flex bg-white px-3 select-none`} onClick={() => handleRematch()}>rematch</div>) : null
+                <div className={`flex bg-white px-3 select-none`} onClick={rematch}>rematch</div>) : null
             }
         </div>
     )

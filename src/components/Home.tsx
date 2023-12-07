@@ -147,13 +147,13 @@ export const Home: React.FC = () => {
             navigate(`/${rematchOffer}`)
             window.location.reload()
         } else {
-            console.log(board)
-            let opponent = board?.black.name !== 'computer'
-            axios.post<BoardResponse>(`board${opponent ? '' : '?opponentName=computer&opponentId=computer-1'}`).then((result) => {
+            let white = board?.white.name === playerName
+            let opponent: Player | undefined = white? board?.black : board?.white
+            axios.post<BoardResponse>(`board?white=${!white}&opponentName=${opponent?.name}&opponentId=${opponent?.id}`).then((result) => {
                 client.publish({ destination: `/board/${board?.id}`, body: `rematch:${result.data.board.id}` })
                 updateId(result.data.player.id)
                 navigate(`/${result.data.board.id}`)
-                setPlayer(1)
+                window.location.reload()
                 setSubscribed(false)
                 setStarted(false)
                 setBoard(result.data.board)
