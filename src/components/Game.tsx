@@ -12,6 +12,7 @@ export const Game: React.FC<{ board: Board, player: number, move: Function, view
     const cols = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h']
     const [resigning, setResigning] = useState<boolean>(false)
     const [lastSpots, setLastSpots] = useState<string[]>(['', ''])
+    const [expandHistory, setExpandHistory] = useState<boolean>(false)
     const navigate = useNavigate()
 
     useEffect(() => {
@@ -20,7 +21,7 @@ export const Game: React.FC<{ board: Board, player: number, move: Function, view
             const lastMoveCode = board.history[viewingMove]?.moveCode || ''
             setLastSpots([lastMoveCode.substring(0, 2), lastMoveCode.substring(2, 4)])
         }
-    }, [board, viewingMove])
+    }, [board, viewingMove, expandHistory])
 
     function resign(e: React.MouseEvent<HTMLSpanElement, MouseEvent>) {
         if (resigning) {
@@ -60,10 +61,13 @@ export const Game: React.FC<{ board: Board, player: number, move: Function, view
 
     return (
         <div className="flex flex-col w-full h-full items-center justify-center">
-            <div className="flex flex-row overflow-x-auto items-left w-[350px] sm:w-[600px] no-scrollbar">
-                {getHistory().map((historyItem) => {
-                    return historyItem
-                })}
+            <div className="flex flex-row mt-10">
+                <div className="hover:text-white select-none" onClick={() => setExpandHistory(!expandHistory)}>{'>'}</div>
+                <div className={`flex ${expandHistory ? 'flex-wrap' : 'flex-row overflow-x-auto'} items-left w-[350px] sm:w-[600px] no-scrollbar`}>
+                    {getHistory().map((historyItem) => {
+                        return historyItem
+                    })}
+                </div>
             </div>
             <div className={`flex ${player === 0 || player === 1 ? 'flex-col-reverse' : 'flex-col'} w-[350px] h-[350px] min-w-[350px] min-h[350px] sm:w-[600px] sm:h-[600px] sm:min-w[600px] sm:min-h-[600px] bg-white text-xs`}>
                 {board.boardKey?.map((row, i) => {
