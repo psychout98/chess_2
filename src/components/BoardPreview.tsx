@@ -9,7 +9,7 @@ const keyMap: {[key: string]: string} = {'r': 'br', 'n' : 'bn', 'b': 'bb', 'k': 
 export const BoardPreview: React.FC<{ board: Board }> = ({ board }) => {
 
     const navigate = useNavigate()
-    const boardKey: string[][] = boardKeyConverter(board?.boardKey)
+    const boardKey: string[][] = boardKeyConverter(board?.fenData?.boardKey)
 
     function boardKeyConverter(oldKey: string[]): string[][] {
         const keyIndex: {[key: string] : number} = {'R': 0, 'N': 0, 'B': 0, 'K': 0, 'Q': 0, 'P': 0,
@@ -50,7 +50,7 @@ export const BoardPreview: React.FC<{ board: Board }> = ({ board }) => {
                 })}
             </div>
             <div className="flex flex-row">
-                <span className="select-none mr-1">{board.stalemate ? 'draw - ' : board.checkmate ? 'checkmate - ' : board.winner === 0 ? (board.whiteToMove ? 'white to move' : 'black to move') : board.winner === 1 ? 'black resigned - ' : 'white resigned - '}</span>
+                <span className="select-none mr-1">{board.stalemate ? 'draw - ' : board.checkmate ? 'checkmate - ' : board.winner === 0 ? (board.fenData.whiteToMove ? 'white to move' : 'black to move') : board.winner === 1 ? 'black resigned - ' : 'white resigned - '}</span>
                 <span className="select-none">{board.winner === 1 ? 'white wins' : board.winner === 2 ? 'black wins' : null}</span>
             </div>
         </div>

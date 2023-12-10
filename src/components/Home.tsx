@@ -92,7 +92,7 @@ export const Home: React.FC = () => {
 
 
     function getBoard(viewingMove: number | undefined = undefined) {
-        axios.get<BoardResponse>(`board/${boardid || board?.id || ''}${viewingMove ? `/${viewingMove}` : ''}`)
+        axios.get<BoardResponse>(`board/${boardid || board?.id || ''}${board && viewingMove && viewingMove < Object.keys(board.history).length - 1 ? `/${viewingMove}` : ''}`)
             .then((result) => {
                 setBoard(result.data.board)
                 updateId(result.data.player.id)

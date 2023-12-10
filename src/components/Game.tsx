@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { Board } from "../model/Board";
+import { Board, FEN } from "../model/Board";
 
 const rows = ['8', '7', '6', '5', '4', '3', '2', '1']
 const cols = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h']
@@ -9,14 +9,15 @@ const keyMap: {[key: string]: string} = {'r': 'br', 'n' : 'bn', 'b': 'bb', 'k': 
 
 export const Game: React.FC<{ board: Board, player: number, move: Function, viewingMove: number, setViewingMove: Function, getBoard: Function, handleRematch: Function }> = ({ board, player, move, viewingMove, setViewingMove, getBoard, handleRematch }) => {
 
+    const fenData: FEN = board.fenData;
     const [selected, setSelected] = useState<string | undefined>(undefined)
     const [currentSpot, setCurrentSpot] = useState<string>('')
     const [moves, setMoves] = useState<string[]>([])
-    const myMove = (board.whiteToMove && player === 1) || (!board.whiteToMove && player === 2)
+    const myMove = (fenData.whiteToMove && player === 1) || (!fenData.whiteToMove && player === 2)
     const [resigning, setResigning] = useState<boolean>(false)
     const [lastSpots, setLastSpots] = useState<string[]>(['', ''])
     const [expandHistory, setExpandHistory] = useState<boolean>(false)
-    const boardKey: string[][] = boardKeyConverter(board?.boardKey)
+    const boardKey: string[][] = boardKeyConverter(fenData.boardKey)
     const navigate = useNavigate()
 
     useEffect(() => {
@@ -57,7 +58,7 @@ export const Game: React.FC<{ board: Board, player: number, move: Function, view
 
     function getHistory(): JSX.Element[] {
         var historyItems: JSX.Element[] = []
-        for (var i = 1; i < Object.keys(board.history).length; i += 2) {
+        for (var i = 0; i < Object.keys(board.history).length; i += 2) {
             historyItems.push(historyItem(i, board.history[i]?.moveString, board.history[i + 1]?.moveString || ''))
         }
         return historyItems
@@ -67,7 +68,7 @@ export const Game: React.FC<{ board: Board, player: number, move: Function, view
         const viewingMove1 = viewingMove === move
         const viewingMove2 = viewingMove === move + 1
         return (<span className="flex flex-nowrap p-1 whitespace-nowrap select-none" key={move}>
-            <span className={`${viewingMove1 ? 'text-white' : ''} ml-1`}>{Math.ceil(move / 2)}.</span>
+            <span className={`${viewingMove1 ? 'text-white' : ''} ml-1`}>{Math.ceil(move / 2) + 1}.</span>
             <span className={`${viewingMove1 ? 'text-white' : ''} hover:text-white mx-1`} onClick={() => viewMove(move)}>{moveString1}</span>
             <span className={`${viewingMove2 ? 'text-white' : ''} hover:text-white mr-1`} onClick={() => viewMove(move + 1)}>{moveString2}</span></span>)
     }
@@ -94,13 +95,13 @@ export const Game: React.FC<{ board: Board, player: number, move: Function, view
                                 ${selected === key ? 'bg-green-300' :
                                         (moves.includes(spot) ? 'bg-green-300 opacity-50' :
                                             (spot === lastSpots[0] ? 'bg-indigo-300 opacity-60' : (spot === lastSpots[1] ? 'bg-indigo-300' : '')))}
-                                ${board.check && key.includes(board.whiteToMove ? 'wk' : 'bk') ? 'bg-red-400' : ''}`} onMouseDown={(e) => {
+                                ${board.check && key.includes(fenData.whiteToMove ? 'wk' : 'bk') ? 'bg-red-400' : ''}`} onMouseDown={(e) => {
                                         e.preventDefault()
-                                        if (key.startsWith(board.whiteToMove ? 'w' : 'b') && myMove && !board.shallow) {
+                                        if (key.startsWith(fenData.whiteToMove ? 'w' : 'b') && myMove && !board.shallow) {
                                             setSelected(key)
                                             setCurrentSpot(spot)
                                             setMoves(Object.keys(board.moves).filter(moveCode => moveCode.startsWith(spot) && board.moves[moveCode].valid).map(moveCode => moveCode.substring(2, 4)))
-                                        } else if (moves.includes(spot)) {
+                                        } else if (moves.includes(spot) && !board.shallow) {
                                             move(currentSpot + spot)
                                             setSelected(undefined)
                                             setCurrentSpot('')
@@ -125,7 +126,7 @@ export const Game: React.FC<{ board: Board, player: number, move: Function, view
                     {board.black?.name}
                 </span>
             </div>
-            <span className="select-none">{board.stalemate ? 'draw' : board.checkmate ? 'checkmate' : board.winner === 0 ? (board.whiteToMove ? 'white to move' : 'black to move') : board.winner === 1 ? 'black resigned' : 'white resigned'}</span>
+            <span className="select-none">{board.stalemate ? 'draw' : board.checkmate ? 'checkmate' : board.winner === 0 ? (fenData.whiteToMove ? 'white to move' : 'black to move') : board.winner === 1 ? 'black resigned' : 'white resigned'}</span>
             <span className="select-none">{board.winner === 1 ? 'white wins' : board.winner === 2 ? 'black wins' : null}</span>
             {player !== 0 ? (board.winner === 0 ?
                 <div className={`flex ${resigning ? 'bg-red-300' : 'bg-white'} px-3 select-none mt-1`} onClick={resign}>resign</div> :
