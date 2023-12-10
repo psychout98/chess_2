@@ -1,11 +1,25 @@
 import { Board } from "../model/Board"
 import { useNavigate } from "react-router-dom";
 
+const rows = ['1', '2', '3', '4', '5', '6', '7', '8']
+const cols = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h']
+const keyMap: {[key: string]: string} = {'r': 'br', 'n' : 'bn', 'b': 'bb', 'k': 'bk', 'q': 'bq', 'p': 'bp',
+    'R': 'wr', 'N': 'wn', 'B': 'wb', 'K': 'wk', 'Q': 'wq'}
+
 export const BoardPreview: React.FC<{ board: Board }> = ({ board }) => {
 
     const navigate = useNavigate()
-    const rows = ['1', '2', '3', '4', '5', '6', '7', '8']
-    const cols = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h']
+    const boardKey: string[][] = boardKeyConverter(board?.boardKey)
+
+    function boardKeyConverter(oldKey: string[]): string[][] {
+        const keyIndex: {[key: string] : number} = {'R': 0, 'N': 0, 'B': 0, 'K': 0, 'Q': 0, 'P': 0,
+            'r': 0, 'n': 0, 'b': 0, 'k': 0, 'q': 0, 'p': 0}
+            console.log(oldKey)
+        return oldKey?.map(row => row.split('').map(key => {
+            keyIndex[key]++
+            return keyMap[key] + keyIndex[key]
+        }));
+    }
 
     return (
         <div className="flex flex-col mb-5">
@@ -19,7 +33,7 @@ export const BoardPreview: React.FC<{ board: Board }> = ({ board }) => {
                 </span>
             </div>
             <div className="flex flex-col-reverse w-[350px] h-[350px] min-w-[350px] min-h[350px] bg-white text-xs" onClick={() => navigate(`/${board.id}`)}>
-                {board.boardKey?.map((row, i) => {
+                {boardKey.map((row, i) => {
                     return <div className="flex flex-row w-full h-[12.5%]" key={i}>
                         {row?.map((key, j) => {
                             return <div className={`flex relative w-[12.5%] h-full

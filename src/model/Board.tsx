@@ -7,8 +7,7 @@ export interface Board {
     id: string,
     white: Player,
     black: Player,
-    pieces: { [key: string]: Piece },
-    boardKey: string[][],
+    boardKey: string[],
     whiteToMove: boolean,
     check: boolean,
     checkmate: boolean,
@@ -29,11 +28,4 @@ export interface Move {
     moveString: string,
     boardKeyString: string,
     valid: boolean
-}
-
-export interface Piece {
-    row: number,
-    col: number,
-    white: boolean,
-    moves: string[]
 }

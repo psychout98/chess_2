@@ -1,6 +1,11 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { Board, Piece } from "../model/Board";
+import { Board } from "../model/Board";
+
+const rows = ['8', '7', '6', '5', '4', '3', '2', '1']
+const cols = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h']
+const keyMap: {[key: string]: string} = {'r': 'br', 'n' : 'bn', 'b': 'bb', 'k': 'bk', 'q': 'bq', 'p': 'bp',
+    'R': 'wr', 'N': 'wn', 'B': 'wb', 'K': 'wk', 'Q': 'wq', 'P': 'wp', 'x': 'x'}
 
 export const Game: React.FC<{ board: Board, player: number, move: Function, viewingMove: number, setViewingMove: Function, getBoard: Function, handleRematch: Function }> = ({ board, player, move, viewingMove, setViewingMove, getBoard, handleRematch }) => {
 
@@ -8,11 +13,10 @@ export const Game: React.FC<{ board: Board, player: number, move: Function, view
     const [currentSpot, setCurrentSpot] = useState<string>('')
     const [moves, setMoves] = useState<string[]>([])
     const myMove = (board.whiteToMove && player === 1) || (!board.whiteToMove && player === 2)
-    const rows = ['1', '2', '3', '4', '5', '6', '7', '8']
-    const cols = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h']
     const [resigning, setResigning] = useState<boolean>(false)
     const [lastSpots, setLastSpots] = useState<string[]>(['', ''])
     const [expandHistory, setExpandHistory] = useState<boolean>(false)
+    const boardKey: string[][] = boardKeyConverter(board?.boardKey)
     const navigate = useNavigate()
 
     useEffect(() => {
@@ -22,6 +26,15 @@ export const Game: React.FC<{ board: Board, player: number, move: Function, view
             setLastSpots([lastMoveCode.substring(0, 2), lastMoveCode.substring(2, 4)])
         }
     }, [board, viewingMove, expandHistory])
+
+    function boardKeyConverter(oldKey: string[]): string[][] {
+        const keyIndex: {[key: string] : number} = {'R': 0, 'N': 0, 'B': 0, 'K': 0, 'Q': 0, 'P': 0,
+            'r': 0, 'n': 0, 'b': 0, 'k': 0, 'q': 0, 'p': 0}
+        return oldKey?.map(row => row.split('').map(key => {
+            keyIndex[key]++
+            return keyMap[key] + (key === 'x' ? '' : keyIndex[key])
+        }));
+    }
 
     function resign(e: React.MouseEvent<HTMLSpanElement, MouseEvent>) {
         if (resigning) {
@@ -69,10 +82,10 @@ export const Game: React.FC<{ board: Board, player: number, move: Function, view
                     })}
                 </div>
             </div>
-            <div className={`flex ${player === 0 || player === 1 ? 'flex-col-reverse' : 'flex-col'} w-[350px] h-[350px] min-w-[350px] min-h[350px] sm:w-[600px] sm:h-[600px] sm:min-w[600px] sm:min-h-[600px] bg-white text-xs`}>
-                {board.boardKey?.map((row, i) => {
+            <div className={`flex ${player === 0 || player === 1 ? 'flex-col' : 'flex-col-reverse'} w-[350px] h-[350px] min-w-[350px] min-h[350px] sm:w-[600px] sm:h-[600px] sm:min-w[600px] sm:min-h-[600px] bg-white text-xs`}>
+                {boardKey.map((row, i) => {
                     return <div className={`flex ${player === 2 ? 'flex-row-reverse' : 'flex-row'} w-full h-[12.5%]`} key={i}>
-                        {row?.map((key, j) => {
+                        {row.map((key, j) => {
                             let spot = i.toString() + j.toString()
                             return <div className={`flex relative w-[12.5%] h-full
                             ${i % 2 === 0 ? (j % 2 === 0 ? 'bg-sky-500 text-white' : 'text-sky-500') :
@@ -86,11 +99,7 @@ export const Game: React.FC<{ board: Board, player: number, move: Function, view
                                         if (key.startsWith(board.whiteToMove ? 'w' : 'b') && myMove && !board.shallow) {
                                             setSelected(key)
                                             setCurrentSpot(spot)
-                                            let piece: Piece | undefined = board.pieces[key]
-                                            if (piece) {
-                                                let pieceMoves: string[] | undefined = piece.moves.filter(moveCode => board.moves[moveCode]?.valid || false).map(moveCode => moveCode.substring(2, 4))
-                                                setMoves(pieceMoves)
-                                            }
+                                            setMoves(Object.keys(board.moves).filter(moveCode => moveCode.startsWith(spot) && board.moves[moveCode].valid).map(moveCode => moveCode.substring(2, 4)))
                                         } else if (moves.includes(spot)) {
                                             move(currentSpot + spot)
                                             setSelected(undefined)
@@ -98,8 +107,8 @@ export const Game: React.FC<{ board: Board, player: number, move: Function, view
                                             setMoves([])
                                         }
                                     }}>
-                                    {key !== '' ? <img className="w-full h-full" src={`/chess_2/${key.substring(0, 2)}.png`} alt="/chess_2/bp.png" /> : null}
-                                    {i === 0 ? <span className={`absolute ${player === 0 || player === 1 ? 'bottom-1 right-1' : 'top-0 left-1'}`}>{cols[j]}</span> : null}
+                                    {key !== 'x' ? <img className="w-full h-full" src={`/chess_2/${key.substring(0, 2)}.png`} alt="/chess_2/bp.png" /> : null}
+                                    {i === 7 ? <span className={`absolute ${player === 0 || player === 1 ? 'bottom-1 right-1' : 'top-0 left-1'}`}>{cols[j]}</span> : null}
                                     {j === 0 ? <span className={`absolute ${player === 0 || player === 1 ? 'top-0 left-1' : 'bottom-1 right-1'}`}>{rows[i]}</span> : null}
                                 </span>
                             </div>

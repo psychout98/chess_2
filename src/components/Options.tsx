@@ -1,6 +1,4 @@
-import { Board } from "../model/Board"
-import { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useState } from "react";
 import Select from "react-select";
 
 export const Options: React.FC<{ createGame: Function }> = ({ createGame }) => {
@@ -13,7 +11,8 @@ export const Options: React.FC<{ createGame: Function }> = ({ createGame }) => {
     const levels = [
         { value: 1, label: 1 },
         { value: 2, label: 2 },
-        { value: 3, label: 3 }
+        { value: 3, label: 3 },
+        { value: 4, label: 4 }
     ]
 
     function options(): JSX.Element {
