@@ -7,8 +7,7 @@ export interface Board {
     id: string,
     white: Player,
     black: Player,
-    fenString: string,
-    fenData: FEN,
+    fen: FEN,
     check: boolean,
     checkmate: boolean,
     stalemate: boolean,
@@ -26,7 +25,6 @@ export interface Player {
 export interface Move {
     moveCode: string,
     moveString: string,
-    boardKeyString: string,
     valid: boolean
 }
 

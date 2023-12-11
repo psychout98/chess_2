@@ -9,7 +9,7 @@ const keyMap: {[key: string]: string} = {'r': 'br', 'n' : 'bn', 'b': 'bb', 'k': 
 
 export const Game: React.FC<{ board: Board, player: number, move: Function, viewingMove: number, setViewingMove: Function, getBoard: Function, handleRematch: Function }> = ({ board, player, move, viewingMove, setViewingMove, getBoard, handleRematch }) => {
 
-    const fenData: FEN = board.fenData;
+    const fenData: FEN = board.fen;
     const [selected, setSelected] = useState<string | undefined>(undefined)
     const [currentSpot, setCurrentSpot] = useState<string>('')
     const [moves, setMoves] = useState<string[]>([])
