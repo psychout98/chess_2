@@ -12,7 +12,7 @@ export interface Board {
     checkmate: boolean,
     stalemate: boolean,
     moves: { [key: string]: Move },
-    history: { [key: number]: PGN },
+    history: PGN[],
     shallow: boolean,
     winner: number
 }
@@ -35,6 +35,7 @@ export interface FEN {
 }
 
 export interface PGN {
+    movedPiece: string,
     moveString: string,
     moveCode: string,
     FEN: string

@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import { Board, BoardResponse, Player } from "../model/Board";
+import { Board, BoardResponse, Player, FEN, PGN } from "../model/Board";
 import axios from "axios";
 import { Game } from "./Game"
 import { Client } from '@stomp/stompjs';
@@ -21,17 +21,59 @@ export const Home: React.FC = () => {
     const [started, setStarted] = useState<boolean>(false)
     const [playerId, setPlayerId] = useState<string>()
     const [playerName, setPlayerName] = useState<string>()
+    const [opponentId, setOpponentId] = useState<string>()
+    const [opponentName, setOpponentName] = useState<string>()
     const [rematchOffer, setRematchOffer] = useState<string | undefined>()
     const [viewingMove, setViewingMove] = useState<number>(0)
     const [showOptions, setShowOptions] = useState<boolean>(false)
+    const [waiting, setWaiting] = useState<boolean>(false)
 
     useEffect(() => {
+        if (board) {
+        }
         setLocalPlayer()
         setWebSocketConnection()
         if (boardid && !board) {
             getBoard()
         }
+        setOpponent()
+        autoMove()
     }, [board, player, subscribed, started, playerId, playerName, rematchOffer])
+
+    function setOpponent() {
+        if (board) {
+            if (board.white.name === playerName) {
+                setOpponentName(board.black.name)
+                setOpponentId(board.black.id)
+            } else if (board.black.name === playerName) {
+                setOpponentName(board.white.name)
+                setOpponentId(board.white.id)
+            } else {
+                setOpponentName(undefined)
+                setOpponentId(undefined)
+            }
+        }
+    }
+
+    async function autoMove() {
+        if (board) {
+        const fenData: FEN = board.fen
+        const myMove = (fenData.whiteToMove && player === 1) || (!fenData.whiteToMove && player === 2)
+        if (opponentId && !waiting && !myMove ) {
+            setWaiting(true)
+            const lastMove: PGN = board.history[board.history.length - 1]
+            if (opponentName === 'computer' && lastMove) {
+                const args: string[] = [
+                    board.fen.fen,
+                    lastMove.moveCode,
+                    lastMove.movedPiece || 'x',
+                    opponentId.split('-')[1]];
+                console.log(args);
+                (window as { [key: string]: any })["main"](args)
+            }
+        }
+    }
+}
 
     function setLocalPlayer() {
         const localStorageId = window.localStorage.getItem("playerId")
@@ -106,33 +148,28 @@ export const Home: React.FC = () => {
     }
 
     function move(moveCode: string, key: string) {
-        console.log('what the fuck')
         axios.put<BoardResponse>(`board/${board?.id}/move/${moveCode}`)
             .then((result) => {
                 updateId(result.data.player.id)
                 setBoard(result.data.board)
                 setViewingMove(Object.keys(result.data.board.history).length - 1)
-                if (result.data.board.black.name === 'computer' || result.data.board.white.name === 'computer') {
-                    (window as { [key: string]: any})["main"]([board?.fen.fen, moveCode, key, result.data.board.black.id.split('-')[1]])
-                } else {
-                    client.publish({ destination: `/board/${board?.id}`, body: 'update' })
-                }
+                client.publish({ destination: `/board/${board?.id}`, body: 'update' })
             }).catch((error) => {
                 console.log(error)
             })
     }
 
-    (window as { [key: string]: any})["move"] = (moveCode: string) => {
-        console.log(moveCode)
+    (window as { [key: string]: any })["move"] = (moveCode: string) => {
         axios.put(`board/${board?.id}/move/${moveCode}`)
-                .then((result) => {
-                    updateId(result.data.player.id)
-                    setBoard(result.data.board)
-                    setViewingMove(Object.keys(result.data.board.history).length - 1)
-                }).catch((error) => {
-                    console.log(error)
-                })
-      }
+            .then((result) => {
+                updateId(result.data.player.id)
+                setBoard(result.data.board)
+                setViewingMove(Object.keys(result.data.board.history).length - 1)
+                setWaiting(false)
+            }).catch((error) => {
+                console.log(error)
+            })
+    }
 
     function createGame(white: boolean, opponent: Player | undefined) {
         axios.post<BoardResponse>(`board?white=${white}${opponent ? `&opponentName=${opponent.name}&opponentId=${opponent.id}` : ''}`).then((result) => {
@@ -165,7 +202,7 @@ export const Home: React.FC = () => {
             window.location.reload()
         } else {
             let white = board?.white.name === playerName
-            let opponent: Player | undefined = white? board?.black : board?.white
+            let opponent: Player | undefined = white ? board?.black : board?.white
             axios.post<BoardResponse>(`board?white=${!white}&opponentName=${opponent?.name}&opponentId=${opponent?.id}`).then((result) => {
                 client.publish({ destination: `/board/${board?.id}`, body: `rematch:${result.data.board.id}` })
                 updateId(result.data.player.id)
@@ -196,7 +233,7 @@ export const Home: React.FC = () => {
                 </div>
             }
         } else if (!board && !started) {
-            return <Options createGame={createGame}/>
+            return <Options createGame={createGame} />
         } else {
             return <div>Impossible error. You should probably just reload</div>
         }

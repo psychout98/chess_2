@@ -1,7 +1,6 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Board, FEN } from "../model/Board";
-import { TreeView } from "./TreeView";
 
 const rows = ['8', '7', '6', '5', '4', '3', '2', '1']
 const cols = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h']
@@ -135,7 +134,6 @@ export const Game: React.FC<{ board: Board, player: number, move: Function, view
                 <div className={`flex ${resigning ? 'bg-red-300' : 'bg-white'} px-3 select-none mt-1`} onClick={resign}>resign</div> :
                 <div className={`flex bg-white px-3 select-none`} onClick={rematch}>rematch</div>) : null
             }
-            <TreeView />
         </div>
     )
 }
