@@ -41,7 +41,7 @@ export const Home: React.FC = () => {
     }, [board, player, subscribed, started, playerId, playerName, rematchOffer])
 
     function setOpponent() {
-        if (board) {
+        if (board && board.white && board.black) {
             if (board.white.name === playerName) {
                 setOpponentName(board.black.name)
                 setOpponentId(board.black.id)
