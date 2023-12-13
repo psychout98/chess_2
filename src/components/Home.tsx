@@ -26,11 +26,9 @@ export const Home: React.FC = () => {
     const [rematchOffer, setRematchOffer] = useState<string | undefined>()
     const [viewingMove, setViewingMove] = useState<number>(0)
     const [showOptions, setShowOptions] = useState<boolean>(false)
-    const [waiting, setWaiting] = useState<boolean>(false)
+    const [waiting, setWaiting] = useState<boolean>(true)
 
     useEffect(() => {
-        if (board) {
-        }
         setLocalPlayer()
         setWebSocketConnection()
         if (boardid && !board) {
@@ -38,7 +36,13 @@ export const Home: React.FC = () => {
         }
         setOpponent()
         autoMove()
-    }, [board, player, subscribed, started, playerId, playerName, rematchOffer])
+        // if (opponentName === 'computer') {
+        //     const script = document.createElement('script')
+        //     script.src = './autoMove.js'
+        //     script.async = true
+        //     document.body.appendChild(script)
+        // }
+    }, [board, player, subscribed, started, playerId, playerName, rematchOffer, opponentId, opponentName, waiting, viewingMove])
 
     function setOpponent() {
         if (board && board.white && board.black) {
@@ -55,25 +59,24 @@ export const Home: React.FC = () => {
         }
     }
 
-    async function autoMove() {
+    function autoMove() {
         if (board) {
-        const fenData: FEN = board.fen
-        const myMove = (fenData.whiteToMove && player === 1) || (!fenData.whiteToMove && player === 2)
-        if (opponentId && !waiting && !myMove ) {
-            setWaiting(true)
-            const lastMove: PGN = board.history[board.history.length - 1]
-            if (opponentName === 'computer' && lastMove) {
-                const args: string[] = [
-                    board.fen.fen,
-                    lastMove.moveCode,
-                    lastMove.movedPiece || 'x',
-                    opponentId.split('-')[1]];
-                console.log(args);
-                (window as { [key: string]: any })["main"](args)
+            const fenData: FEN = board.fen
+            const myMove = (fenData.whiteToMove && player === 1) || (!fenData.whiteToMove && player === 2)
+            if (opponentId && !waiting && !myMove) {
+                setWaiting(true)
+                const lastMove: PGN = board.history[board.history.length - 1]
+                if (opponentName === 'computer' && lastMove) {
+                    const args: string[] = [
+                        lastMove.fen,
+                        lastMove.moveCode,
+                        opponentId.split('-')[1]];
+                    console.log(args);
+                    (window as { [key: string]: any })["main"](args)
+                }
             }
         }
     }
-}
 
     function setLocalPlayer() {
         const localStorageId = window.localStorage.getItem("playerId")
@@ -142,6 +145,7 @@ export const Home: React.FC = () => {
                 if (result.data.board.white && result.data.board.black) {
                     setStarted(true)
                 }
+                setWaiting(false)
             }).catch((error) => {
                 console.log(error)
             })
@@ -165,7 +169,6 @@ export const Home: React.FC = () => {
                 updateId(result.data.player.id)
                 setBoard(result.data.board)
                 setViewingMove(Object.keys(result.data.board.history).length - 1)
-                setWaiting(false)
             }).catch((error) => {
                 console.log(error)
             })

@@ -35,8 +35,7 @@ export interface FEN {
 }
 
 export interface PGN {
-    movedPiece: string,
     moveString: string,
     moveCode: string,
-    FEN: string
+    fen: string
 }
