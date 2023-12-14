@@ -35,13 +35,7 @@ export const Home: React.FC = () => {
             getBoard()
         }
         setOpponent()
-        autoMove()
-        // if (opponentName === 'computer') {
-        //     const script = document.createElement('script')
-        //     script.src = './autoMove.js'
-        //     script.async = true
-        //     document.body.appendChild(script)
-        // }
+        setTimeout(autoMove, 1000)
     }, [board, player, subscribed, started, playerId, playerName, rematchOffer, opponentId, opponentName, waiting, viewingMove])
 
     function setOpponent() {
@@ -63,7 +57,7 @@ export const Home: React.FC = () => {
         if (board) {
             const fenData: FEN = board.fen
             const myMove = (fenData.whiteToMove && player === 1) || (!fenData.whiteToMove && player === 2)
-            if (opponentId && !waiting && !myMove) {
+            if (opponentId && !waiting && !myMove && board.winner === 0) {
                 setWaiting(true)
                 const lastMove: PGN = board.history[board.history.length - 1]
                 if (opponentName === 'computer' && lastMove) {
