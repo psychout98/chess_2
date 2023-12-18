@@ -10,7 +10,6 @@ import { Options } from "./Options";
 const client = new Client();
 client.brokerURL = process.env.REACT_APP_CHESS_SERVER_WS;
 
-
 export const Home: React.FC = () => {
 
     let { boardid } = useParams()
@@ -26,7 +25,6 @@ export const Home: React.FC = () => {
     const [rematchOffer, setRematchOffer] = useState<string | undefined>()
     const [viewingMove, setViewingMove] = useState<number>(0)
     const [showOptions, setShowOptions] = useState<boolean>(false)
-    const [waiting, setWaiting] = useState<boolean>(true)
 
     useEffect(() => {
         setLocalPlayer()
@@ -35,8 +33,7 @@ export const Home: React.FC = () => {
             getBoard()
         }
         setOpponent()
-        setTimeout(autoMove, 1000)
-    }, [board, player, subscribed, started, playerId, playerName, rematchOffer, opponentId, opponentName, waiting, viewingMove])
+    }, [board, player, subscribed, started, playerId, playerName, rematchOffer, opponentId, opponentName, viewingMove])
 
     function setOpponent() {
         if (board && board.white && board.black) {
@@ -49,25 +46,6 @@ export const Home: React.FC = () => {
             } else {
                 setOpponentName(undefined)
                 setOpponentId(undefined)
-            }
-        }
-    }
-
-    function autoMove() {
-        if (board) {
-            const fenData: FEN = board.fen
-            const myMove = (fenData.whiteToMove && player === 1) || (!fenData.whiteToMove && player === 2)
-            if (opponentId && !waiting && !myMove && board.winner === 0) {
-                setWaiting(true)
-                const lastMove: PGN = board.history[board.history.length - 1]
-                if (opponentName === 'computer' && lastMove) {
-                    const args: string[] = [
-                        lastMove.fen,
-                        lastMove.moveCode,
-                        opponentId.split('-')[1]];
-                    console.log(args);
-                    (window as { [key: string]: any })["main"](args)
-                }
             }
         }
     }
@@ -109,7 +87,7 @@ export const Home: React.FC = () => {
             client.deactivate()
             client.onConnect = () => {
                 client.subscribe(`/board/${board?.id}`, (message) => {
-                    if (message?.body === 'update') {
+                    if (message?.body === opponentName) {
                         getBoard()
                     }
                     if (message?.body.startsWith('rematch:')) {
@@ -139,7 +117,6 @@ export const Home: React.FC = () => {
                 if (result.data.board.white && result.data.board.black) {
                     setStarted(true)
                 }
-                setWaiting(false)
             }).catch((error) => {
                 console.log(error)
             })
@@ -151,18 +128,7 @@ export const Home: React.FC = () => {
                 updateId(result.data.player.id)
                 setBoard(result.data.board)
                 setViewingMove(Object.keys(result.data.board.history).length - 1)
-                client.publish({ destination: `/board/${board?.id}`, body: 'update' })
-            }).catch((error) => {
-                console.log(error)
-            })
-    }
-
-    (window as { [key: string]: any })["move"] = (moveCode: string) => {
-        axios.put(`board/${board?.id}/move/${moveCode}`)
-            .then((result) => {
-                updateId(result.data.player.id)
-                setBoard(result.data.board)
-                setViewingMove(Object.keys(result.data.board.history).length - 1)
+                client.publish({ destination: `/board/${board?.id}`, body: playerName })
             }).catch((error) => {
                 console.log(error)
             })
@@ -185,7 +151,7 @@ export const Home: React.FC = () => {
         e.preventDefault()
         axios.put<Player>(`board/${board?.id}/join`)
             .then((result) => {
-                client.publish({ destination: `/board/${board?.id}`, body: 'update' })
+                client.publish({ destination: `/board/${board?.id}`, body: playerName })
                 updateId(result.data.id)
                 setStarted(true)
             }).catch((error) => {
@@ -198,9 +164,8 @@ export const Home: React.FC = () => {
             navigate(`/${rematchOffer}`)
             window.location.reload()
         } else {
-            let white = board?.white.name === playerName
-            let opponent: Player | undefined = white ? board?.black : board?.white
-            axios.post<BoardResponse>(`board?white=${!white}&opponentName=${opponent?.name}&opponentId=${opponent?.id}`).then((result) => {
+            let white = player === 1
+            axios.post<BoardResponse>(`board?white=${!white}&opponentName=${opponentName}&opponentId=${opponentId}`).then((result) => {
                 client.publish({ destination: `/board/${board?.id}`, body: `rematch:${result.data.board.id}` })
                 updateId(result.data.player.id)
                 navigate(`/${result.data.board.id}`)
