@@ -29,7 +29,6 @@ export const Home: React.FC = () => {
         setLocalPlayer()
         setWebSocketConnection()
         if (boardId && !board && playerId) {
-            console.log(playerId)
             getBoard()
         }
         setOpponent()

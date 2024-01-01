@@ -1,11 +1,13 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, RefObject, createRef, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { Board, FEN } from "../model/Board";
 
 const rows = ['8', '7', '6', '5', '4', '3', '2', '1']
 const cols = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h']
-const keyMap: {[key: string]: string} = {'r': 'br', 'n' : 'bn', 'b': 'bb', 'k': 'bk', 'q': 'bq', 'p': 'bp',
-    'R': 'wr', 'N': 'wn', 'B': 'wb', 'K': 'wk', 'Q': 'wq', 'P': 'wp', 'x': 'x'}
+const keyMap: { [key: string]: string } = {
+    'r': 'br', 'n': 'bn', 'b': 'bb', 'k': 'bk', 'q': 'bq', 'p': 'bp',
+    'R': 'wr', 'N': 'wn', 'B': 'wb', 'K': 'wk', 'Q': 'wq', 'P': 'wp', 'x': 'x'
+}
 
 export const Game: React.FC<{ board: Board, player: number, move: Function, getBoard: Function, handleRematch: Function }> = ({ board, player, move, getBoard, handleRematch }) => {
 
@@ -22,6 +24,8 @@ export const Game: React.FC<{ board: Board, player: number, move: Function, getB
     const [expandHistory, setExpandHistory] = useState<boolean>(false)
     const [boardKey, setBoardKey] = useState<string[][]>([])
     const navigate = useNavigate()
+    const historyRef = useRef<HTMLDivElement | null>()
+    const historyItemRef = useRef<HTMLSpanElement | null>()
 
     useEffect(() => {
         setViewingMove(currentMove)
@@ -32,23 +36,29 @@ export const Game: React.FC<{ board: Board, player: number, move: Function, getB
             const lastMoveCode = board.history[viewingMove]?.moveCode || ''
             setLastSpots([lastMoveCode.substring(0, 2), lastMoveCode.substring(2, 4)])
         }
+
         if (viewingMove !== currentMove) {
             setSelected(undefined)
             setCurrentSpot('')
             setMoves([])
+        } else if (!expandHistory) {
+            historyRef.current?.scrollTo(historyRef.current.scrollWidth - historyRef.current.offsetWidth, 0)
         }
+
         setBoardKey(boardKeyConverter(board.history[viewingMove]?.position || fenData.fen))
 
         function keyDownListener(e: KeyboardEvent) {
             if (e.key === "ArrowRight" && viewingMove < currentMove) {
+                historyRef.current?.scrollBy(historyItemRef.current?.offsetWidth || 100, 0)
                 setViewingMove(viewingMove + 1)
             } else if (e.key === "ArrowLeft" && viewingMove > 0) {
+                historyRef.current?.scrollBy(-1 * (historyItemRef.current?.offsetWidth || 100), 0)
                 setViewingMove(viewingMove - 1)
             }
         }
 
         window.addEventListener('keydown', keyDownListener)
-        
+
         return () => {
             window.removeEventListener('keydown', keyDownListener)
         }
@@ -63,7 +73,7 @@ export const Game: React.FC<{ board: Board, player: number, move: Function, getB
                 let num = Number.parseInt(key)
                 if (num) {
                     i += num
-                    for (var j=0; j<i; j++) {
+                    for (var j = 0; j < i; j++) {
                         newRow += 'x'
                     }
                 } else {
@@ -72,8 +82,10 @@ export const Game: React.FC<{ board: Board, player: number, move: Function, getB
             })
             return newRow
         })
-        const keyIndex: {[key: string] : number} = {'R': 0, 'N': 0, 'B': 0, 'K': 0, 'Q': 0, 'P': 0,
-            'r': 0, 'n': 0, 'b': 0, 'k': 0, 'q': 0, 'p': 0}
+        const keyIndex: { [key: string]: number } = {
+            'R': 0, 'N': 0, 'B': 0, 'K': 0, 'Q': 0, 'P': 0,
+            'r': 0, 'n': 0, 'b': 0, 'k': 0, 'q': 0, 'p': 0
+        }
         return oldKey?.map(row => row.split('').map(key => {
             keyIndex[key]++
             return keyMap[key] + (key === 'x' ? '' : keyIndex[key])
@@ -107,16 +119,21 @@ export const Game: React.FC<{ board: Board, player: number, move: Function, getB
         const viewingMove1 = viewingMove === move
         const viewingMove2 = viewingMove === move + 1
         return (<span className={`flex flex-nowrap p-1 whitespace-nowrap select-none ${expandHistory ? 'min-w-[70px] sm:min-w-[120px]' : ''}`} key={move}>
-            <span className={`${viewingMove1 ? 'text-white' : ''} ml-1`}>{Math.ceil(move / 2) + 1}.</span>
-            <span className={`${viewingMove1 ? 'text-white' : ''} hover:text-white mx-1`} onClick={() => setViewingMove(move)}>{moveString1}</span>
-            <span className={`${viewingMove2 ? 'text-white' : ''} hover:text-white mr-1`} onClick={() => setViewingMove(move + 1)}>{moveString2}</span></span>)
+            <span ref={viewingMove1 ? (ref) => historyItemRef.current = ref : null}>
+                <span className={`${viewingMove1 ? 'text-white' : ''} ml-1`}>{Math.ceil(move / 2) + 1}.</span>
+                <span className={`${viewingMove1 ? 'text-white' : ''} hover:text-white mx-1`} onClick={() => setViewingMove(move)}>{moveString1}</span>
+            </span>
+            <span ref={viewingMove2 ? (ref) => historyItemRef.current = ref : null}>
+                <span className={`${viewingMove2 ? 'text-white' : ''} hover:text-white mr-1`} onClick={() => setViewingMove(move + 1)}>{moveString2}</span>
+            </span>
+        </span>)
     }
 
     return (
         <div className="flex flex-col w-full h-full items-center justify-center">
             <div className="flex flex-row mt-10">
                 <div className="hover:text-white select-none" onClick={() => setExpandHistory(!expandHistory)}>{'>'}</div>
-                <div className={`flex ${expandHistory ? 'flex-wrap' : 'flex-row overflow-x-auto'} items-left w-[350px] sm:w-[600px] no-scrollbar`}>
+                <div ref={(ref) => historyRef.current = ref} className={`flex ${expandHistory ? 'flex-wrap' : 'flex-row overflow-x-auto'} items-left w-[350px] sm:w-[600px] no-scrollbar`}>
                     {getHistory().map((historyItem) => {
                         return historyItem
                     })}
@@ -158,11 +175,11 @@ export const Game: React.FC<{ board: Board, player: number, move: Function, getB
                 })}
             </div>
             <div className="flex flex-row">
-                <span className="mx-1 select-none hover:text-white" onClick={board.white?.name === 'anonymous' ? () => {} : () => navigate(`/player/${board.white?.name}`)}>
+                <span className="mx-1 select-none hover:text-white" onClick={board.white?.name === 'anonymous' ? () => { } : () => navigate(`/player/${board.white?.name}`)}>
                     {board.white?.name}
                 </span>
                 <span>vs.</span>
-                <span className="mx-1 select-none hover:text-white" onClick={board.black?.name === 'anonymous' ? () => {} : () => navigate(`/player/${board.black?.name}`)}>
+                <span className="mx-1 select-none hover:text-white" onClick={board.black?.name === 'anonymous' ? () => { } : () => navigate(`/player/${board.black?.name}`)}>
                     {board.black?.name}
                 </span>
             </div>
