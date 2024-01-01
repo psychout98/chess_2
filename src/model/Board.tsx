@@ -37,5 +37,5 @@ export interface FEN {
 export interface PGN {
     moveString: string,
     moveCode: string,
-    fen: string
+    position: string
 }

@@ -14,7 +14,7 @@ function App(): JSX.Element {
   return (
     <Router>
       <Routes>
-        <Route path='/:boardid?' element={<Home />} />
+        <Route path='/:boardId?' element={<Home />} />
         <Route path='/login' element={<Login />} />
         <Route path='/signup' element={<Signup />} />
         <Route path='/player/:playerName?' element={<Profile />} />

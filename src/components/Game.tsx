@@ -7,29 +7,71 @@ const cols = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h']
 const keyMap: {[key: string]: string} = {'r': 'br', 'n' : 'bn', 'b': 'bb', 'k': 'bk', 'q': 'bq', 'p': 'bp',
     'R': 'wr', 'N': 'wn', 'B': 'wb', 'K': 'wk', 'Q': 'wq', 'P': 'wp', 'x': 'x'}
 
-export const Game: React.FC<{ board: Board, player: number, move: Function, viewingMove: number, setViewingMove: Function, getBoard: Function, handleRematch: Function }> = ({ board, player, move, viewingMove, setViewingMove, getBoard, handleRematch }) => {
+export const Game: React.FC<{ board: Board, player: number, move: Function, getBoard: Function, handleRematch: Function }> = ({ board, player, move, getBoard, handleRematch }) => {
 
     const fenData: FEN = board.fen;
+    const [viewingMove, setViewingMove] = useState<number>(0)
     const [selected, setSelected] = useState<string | undefined>(undefined)
     const [currentSpot, setCurrentSpot] = useState<string>('')
     const [selectedKey, setSelectedKey] = useState<string>('x')
     const [moves, setMoves] = useState<string[]>([])
-    const myMove = (fenData.whiteToMove && player === 1) || (!fenData.whiteToMove && player === 2)
+    const currentMove = Object.keys(board.history).length - 1
+    const myMove = ((fenData.whiteToMove && player === 1) || (!fenData.whiteToMove && player === 2)) && viewingMove === currentMove
     const [resigning, setResigning] = useState<boolean>(false)
     const [lastSpots, setLastSpots] = useState<string[]>(['', ''])
     const [expandHistory, setExpandHistory] = useState<boolean>(false)
-    const boardKey: string[][] = boardKeyConverter(fenData.boardKey)
+    const [boardKey, setBoardKey] = useState<string[][]>([])
     const navigate = useNavigate()
 
     useEffect(() => {
-        const currentMove = Object.keys(board.history).length - 1;
+        setViewingMove(currentMove)
+    }, [board])
+
+    useEffect(() => {
         if (currentMove > 0) {
             const lastMoveCode = board.history[viewingMove]?.moveCode || ''
             setLastSpots([lastMoveCode.substring(0, 2), lastMoveCode.substring(2, 4)])
         }
-    }, [board, viewingMove, expandHistory])
+        if (viewingMove !== currentMove) {
+            setSelected(undefined)
+            setCurrentSpot('')
+            setMoves([])
+        }
+        setBoardKey(boardKeyConverter(board.history[viewingMove]?.position || fenData.fen))
 
-    function boardKeyConverter(oldKey: string[]): string[][] {
+        function keyDownListener(e: KeyboardEvent) {
+            if (e.key === "ArrowRight" && viewingMove < currentMove) {
+                setViewingMove(viewingMove + 1)
+            } else if (e.key === "ArrowLeft" && viewingMove > 0) {
+                setViewingMove(viewingMove - 1)
+            }
+        }
+
+        window.addEventListener('keydown', keyDownListener)
+        
+        return () => {
+            window.removeEventListener('keydown', keyDownListener)
+        }
+    }, [viewingMove])
+
+    function boardKeyConverter(position: string): string[][] {
+        const fenKey = position.split(' ')[0].split('/')
+        let oldKey: string[] = fenKey.map(row => {
+            let newRow = ''
+            row.split('').forEach(key => {
+                let i = 0
+                let num = Number.parseInt(key)
+                if (num) {
+                    i += num
+                    for (var j=0; j<i; j++) {
+                        newRow += 'x'
+                    }
+                } else {
+                    newRow += key
+                }
+            })
+            return newRow
+        })
         const keyIndex: {[key: string] : number} = {'R': 0, 'N': 0, 'B': 0, 'K': 0, 'Q': 0, 'P': 0,
             'r': 0, 'n': 0, 'b': 0, 'k': 0, 'q': 0, 'p': 0}
         return oldKey?.map(row => row.split('').map(key => {
@@ -39,6 +81,7 @@ export const Game: React.FC<{ board: Board, player: number, move: Function, view
     }
 
     function resign(e: React.MouseEvent<HTMLSpanElement, MouseEvent>) {
+        e.preventDefault()
         if (resigning) {
             setResigning(false)
             move("resign")
@@ -50,11 +93,6 @@ export const Game: React.FC<{ board: Board, player: number, move: Function, view
     function rematch(e: React.MouseEvent<HTMLSpanElement, MouseEvent>) {
         e.preventDefault()
         handleRematch()
-    }
-
-    function viewMove(move: number) {
-        setViewingMove(move)
-        getBoard(move)
     }
 
     function getHistory(): JSX.Element[] {
@@ -70,8 +108,8 @@ export const Game: React.FC<{ board: Board, player: number, move: Function, view
         const viewingMove2 = viewingMove === move + 1
         return (<span className="flex flex-nowrap p-1 whitespace-nowrap select-none" key={move}>
             <span className={`${viewingMove1 ? 'text-white' : ''} ml-1`}>{Math.ceil(move / 2) + 1}.</span>
-            <span className={`${viewingMove1 ? 'text-white' : ''} hover:text-white mx-1`} onClick={() => viewMove(move)}>{moveString1}</span>
-            <span className={`${viewingMove2 ? 'text-white' : ''} hover:text-white mr-1`} onClick={() => viewMove(move + 1)}>{moveString2}</span></span>)
+            <span className={`${viewingMove1 ? 'text-white' : ''} hover:text-white mx-1`} onClick={() => setViewingMove(move)}>{moveString1}</span>
+            <span className={`${viewingMove2 ? 'text-white' : ''} hover:text-white mr-1`} onClick={() => setViewingMove(move + 1)}>{moveString2}</span></span>)
     }
 
     return (

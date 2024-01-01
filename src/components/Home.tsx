@@ -12,7 +12,7 @@ client.brokerURL = process.env.REACT_APP_CHESS_SERVER_WS;
 
 export const Home: React.FC = () => {
 
-    let { boardid } = useParams()
+    let { boardId } = useParams()
     const navigate = useNavigate()
     const [board, setBoard] = useState<Board>()
     const [player, setPlayer] = useState<number>(0)
@@ -23,17 +23,17 @@ export const Home: React.FC = () => {
     const [opponentId, setOpponentId] = useState<string>()
     const [opponentName, setOpponentName] = useState<string>()
     const [rematchOffer, setRematchOffer] = useState<string | undefined>()
-    const [viewingMove, setViewingMove] = useState<number>(0)
     const [showOptions, setShowOptions] = useState<boolean>(false)
 
     useEffect(() => {
         setLocalPlayer()
         setWebSocketConnection()
-        if (boardid && !board) {
+        if (boardId && !board && playerId) {
+            console.log(playerId)
             getBoard()
         }
         setOpponent()
-    }, [board, player, subscribed, started, playerId, playerName, rematchOffer, opponentId, opponentName, viewingMove])
+    }, [boardId, board, player, subscribed, started, playerId, playerName, rematchOffer, opponentId, opponentName])
 
     function setOpponent() {
         if (board && board.white && board.black) {
@@ -108,12 +108,11 @@ export const Home: React.FC = () => {
     }
 
 
-    function getBoard(viewingMove: number | undefined = undefined) {
-        axios.get<BoardResponse>(`board/${boardid || board?.id || ''}${board && viewingMove && viewingMove < Object.keys(board.history).length - 1 ? `/${viewingMove}` : ''}`)
+    function getBoard() {
+        axios.get<BoardResponse>(`board/${boardId || board?.id || ''}`)
             .then((result) => {
                 setBoard(result.data.board)
                 updateId(result.data.player.id)
-                setViewingMove(viewingMove || Object.keys(result.data.board.history).length - 1)
                 if (result.data.board.white && result.data.board.black) {
                     setStarted(true)
                 }
@@ -127,7 +126,6 @@ export const Home: React.FC = () => {
             .then((result) => {
                 updateId(result.data.player.id)
                 setBoard(result.data.board)
-                setViewingMove(Object.keys(result.data.board.history).length - 1)
                 client.publish({ destination: `/board/${board?.id}`, body: playerName })
             }).catch((error) => {
                 console.log(error)
@@ -184,7 +182,7 @@ export const Home: React.FC = () => {
 
     function mainPanel(): JSX.Element {
         if (board && started) {
-            return <Game board={board} move={move} viewingMove={viewingMove} setViewingMove={setViewingMove} getBoard={getBoard} player={player} handleRematch={handleRematch} />
+            return <Game board={board} move={move} getBoard={getBoard} player={player} handleRematch={handleRematch} />
         } else if (board && !started) {
             if (player === 0) {
                 return <div className="flex bg-white select-none p-3" onClick={joinGame}>Join game</div>
