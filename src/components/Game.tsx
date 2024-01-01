@@ -106,7 +106,7 @@ export const Game: React.FC<{ board: Board, player: number, move: Function, getB
     function historyItem(move: number, moveString1: string, moveString2: string) {
         const viewingMove1 = viewingMove === move
         const viewingMove2 = viewingMove === move + 1
-        return (<span className="flex flex-nowrap p-1 whitespace-nowrap select-none" key={move}>
+        return (<span className={`flex flex-nowrap p-1 whitespace-nowrap select-none ${expandHistory ? 'min-w-[70px] sm:min-w-[120px]' : ''}`} key={move}>
             <span className={`${viewingMove1 ? 'text-white' : ''} ml-1`}>{Math.ceil(move / 2) + 1}.</span>
             <span className={`${viewingMove1 ? 'text-white' : ''} hover:text-white mx-1`} onClick={() => setViewingMove(move)}>{moveString1}</span>
             <span className={`${viewingMove2 ? 'text-white' : ''} hover:text-white mr-1`} onClick={() => setViewingMove(move + 1)}>{moveString2}</span></span>)
