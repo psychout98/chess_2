@@ -134,7 +134,7 @@ export const Game: React.FC<{ board: Board, player: number, move: Function, getB
                                 ${selected === key ? 'bg-green-300' :
                                         (moves.includes(spot) ? 'bg-green-300 opacity-50' :
                                             (spot === lastSpots[0] ? 'bg-indigo-300 opacity-60' : (spot === lastSpots[1] ? 'bg-indigo-300' : '')))}
-                                ${board.check && key.includes(fenData.whiteToMove ? 'wk' : 'bk') ? 'bg-red-400' : ''}`} onMouseDown={(e) => {
+                                ${board.check && key.includes(fenData.whiteToMove ? 'wk' : 'bk') && viewingMove === currentMove ? 'bg-red-400' : ''}`} onMouseDown={(e) => {
                                         e.preventDefault()
                                         if (key.startsWith(fenData.whiteToMove ? 'w' : 'b') && myMove && !board.shallow) {
                                             setSelected(key)
